@@ -1,4 +1,18 @@
 #pragma once
+#include <type_traits>
+
+// 用于输出dll的函数的返回值定义
+#define DEF_EXPORT_VECTOR(NAME, T, LENGTH) typedef struct {T data[LENGTH];}NAME
+
+DEF_EXPORT_VECTOR(vec2i_export, int, 2);
+DEF_EXPORT_VECTOR(vec2f_export, float, 2);
+DEF_EXPORT_VECTOR(vec3i_export, int, 3);
+DEF_EXPORT_VECTOR(vec3f_export, float, 3);
+
+//// 非泛型类可以写类型转换 但是下面的模板和上面的类型之间的转换似乎很难写成模板, 因此用宏是比较简便的选择
+//
+//// 对非指针类型的强制类型重解释, 但类型安全和数据长度问题自己负责
+//#define BIT_CAST_UNCHECKED(T_TO, INPUT) *reinterpret_cast<T_TO*>(&(INPUT))
 
 template<typename T>
 class vector2_template
@@ -29,6 +43,20 @@ public:
         this->y = y;
     }
 
+    vector2_template(const vec2i_export& v)
+    {
+        static_assert(std::is_same<T, int>::value, "only vector2_template<int> can use this convertion.");
+        x = v.data[0];
+        y = v.data[1];
+    }
+
+    vector2_template(const vec2f_export& v)
+    {
+        static_assert(std::is_same<T, float>::value, "only vector2_template<float> can use this convertion.");
+        x = v.data[0];
+        y = v.data[1];
+    }
+
     template<typename T>
     vector2_template<T> operator+(const vector2_template<T>& r)
     {
@@ -40,6 +68,30 @@ public:
     {
         return vector2_template<T>(x - r.x, y - r.y);
     }
+
+    template<typename T>
+    bool operator==(const vector2_template<T>& r) const noexcept
+    {
+        return x == r.x && y == r.y;
+    }
+
+    template<typename T>
+    bool operator!=(const vector2_template<T>& r) const noexcept
+    {
+        return x != r.x || y != r.y;
+    }
+
+    operator vec2i_export()
+    {
+        static_assert(std::is_same<T, int>::value, "only vector2_template<int> can use this convertion.");
+        return *reinterpret_cast<vec2i_export*>(this);
+    }
+    operator vec2f_export()
+    {
+        static_assert(std::is_same<T, float>::value, "only vector2_template<int> can use this convertion.");
+        return *reinterpret_cast<vec2f_export*>(this);
+    }
+
 };
 
 template<typename T>
@@ -81,6 +133,22 @@ public:
         this->z = z;
     }
 
+    vector3_template(const vec3i_export& v)
+    {
+        static_assert(std::is_same<T, int>::value, "only vector3_template<int> can use this convertion.");
+        x = v.data[0];
+        y = v.data[1];
+        z = v.data[2];
+    }
+
+    vector3_template(const vec3f_export& v)
+    {
+        static_assert(std::is_same<T, float>::value, "only vector3_template<float> can use this convertion.");
+        x = v.data[0];
+        y = v.data[1];
+        z = v.data[2];
+    }
+
     template<typename T>
     vector3_template<T> operator+(const vector3_template<T>& r)
     {
@@ -92,10 +160,33 @@ public:
     {
         return vector3_template<T>(x - r.x, y - r.y, z - r.z);
     }
+
+    template<typename T>
+    bool operator==(const vector3_template<T>& r) const noexcept
+    {
+        return x == r.x && y == r.y && z == r.z;
+    }
+
+    template<typename T>
+    bool operator!=(const vector3_template<T>& r) const noexcept
+    {
+        return x != r.x || y != r.y || z != r.z;
+    }
+
+    operator vec3i_export()
+    {
+        static_assert(std::is_same<T, int>::value, "only vector3_template<int> can use this convertion.");
+        return *reinterpret_cast<vec3i_export*>(this);
+    }
+    operator vec3f_export()
+    {
+        static_assert(std::is_same<T, float>::value, "only vector3_template<float> can use this convertion.");
+        return *reinterpret_cast<vec3f_export*>(this);
+    }
 };
 
 typedef vector2_template<float> vector2f;
-typedef vector3_template<float> vector3f;
-
 typedef vector2_template<int> vector2i;
+
 typedef vector3_template<int> vector3i;
+typedef vector3_template<float> vector3f;

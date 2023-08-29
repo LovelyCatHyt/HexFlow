@@ -15,38 +15,38 @@ const float half_s3 = 0.86602540378443864676f;
 /// </summary>
 const float i_s3 = 0.577350269189625764509148f;
 
-vector2i offset2axial(vector2i offset)
+vec2i_export API_DEF offset2axial(vector2i offset)
 {
     auto q = offset.x - (offset.y - (offset.y & 1)) / 2;
     auto r = offset.y;
     return vector2i(q, r);
 }
 
-vector2i axial2offset(vector2i axial)
+vec2i_export API_DEF axial2offset(vector2i axial)
 {
     auto col = axial.x + (axial.y - (axial.y & 1)) / 2;
     auto row = axial.y;
     return vector2i(col, row);
 }
 
-vector3i axial2cube(vector2i axial)
+vec3i_export API_DEF axial2cube(vector2i axial)
 {
-    return vector3i(axial.x, axial.y, -axial.x-axial.y);
+    return vector3i(axial.x, axial.y, -axial.x - axial.y);
 }
 
-vector2i cube2axial(vector3i cube)
+vec2i_export API_DEF cube2axial(vector3i cube)
 {
     return cube.xy;
 }
 
-vector3f axial2position(vector2i axial)
+vec3f_export API_DEF axial2position(vector2i axial)
 {
     auto x = s3 * axial.x + half_s3 * axial.y;
     auto y = 1.5f * axial.y;
     return vector3f(x, y, 0);
 }
 
-vector2i position2axial(vector2f position, float cell_size)
+vec2i_export API_DEF position2axial(vector2f position, float cell_size)
 {
     auto q = i_s3 * position.x - 1.0f / 3 * position.y;
     q /= cell_size;
@@ -55,13 +55,13 @@ vector2i position2axial(vector2f position, float cell_size)
     return cube2axial(cube_round(vector3f(q, r, -q - r)));
 }
 
-int axial_distance(vector2i a, vector2i b)
+int API_DEF axial_distance(vector2i a, vector2i b)
 {
     auto diff = a - b;
     return (abs(diff.x) + abs(diff.x + diff.y) + abs(diff.y)) / 2;
 }
 
-vector3i cube_round(vector3f cube_frac)
+vec3i_export API_DEF cube_round(vector3f cube_frac)
 {
     auto q = round(cube_frac.x);
     auto r = round(cube_frac.y);
