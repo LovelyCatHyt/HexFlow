@@ -39,11 +39,11 @@ vec2i_export API_DEF cube2axial(vector3i cube)
     return cube.xy;
 }
 
-vec3f_export API_DEF axial2position(vector2i axial)
+vec2f_export API_DEF axial2position(vector2i axial)
 {
     auto x = s3 * axial.x + half_s3 * axial.y;
     auto y = 1.5f * axial.y;
-    return vector3f(x, y, 0);
+    return vector2f(x, y);
 }
 
 vec2i_export API_DEF position2axial(vector2f position, float cell_size)

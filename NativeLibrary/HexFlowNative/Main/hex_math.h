@@ -14,7 +14,7 @@ extern "C" {
 
     vec2i_export API_DEF cube2axial(vector3i cube);
 
-    vec3f_export API_DEF axial2position(vector2i axial);
+    vec2f_export API_DEF axial2position(vector2i axial);
 
     vec2i_export API_DEF position2axial(vector2f position, float cell_size);
 
