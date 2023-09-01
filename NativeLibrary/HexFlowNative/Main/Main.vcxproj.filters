@@ -24,12 +24,18 @@
     <ClInclude Include="hex_math.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="mesh_generator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="hex_math.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh_generator.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

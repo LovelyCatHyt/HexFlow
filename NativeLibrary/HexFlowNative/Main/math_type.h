@@ -190,3 +190,18 @@ typedef vector2_template<int> vector2i;
 
 typedef vector3_template<int> vector3i;
 typedef vector3_template<float> vector3f;
+
+// math utils -----------------------------------------------
+
+/// <summary>
+/// sqrt 3
+/// </summary>
+const float s3 = 1.73205080756887729f;
+/// <summary>
+/// (sqrt 3) / 2
+/// </summary>
+const float half_s3 = 0.86602540378443864676f;
+/// <summary>
+/// 1 / (sqrt 3)
+/// </summary>
+const float i_s3 = 0.577350269189625764509148f;

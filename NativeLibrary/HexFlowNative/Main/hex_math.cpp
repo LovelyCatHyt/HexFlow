@@ -2,19 +2,6 @@
 #include <cmath>
 #include "hex_math.h"
 
-/// <summary>
-/// sqrt 3
-/// </summary>
-const float s3 = 1.73205080756887729f;
-/// <summary>
-/// (sqrt 3) / 2
-/// </summary>
-const float half_s3 = 0.86602540378443864676f;
-/// <summary>
-/// 1 / (sqrt 3)
-/// </summary>
-const float i_s3 = 0.577350269189625764509148f;
-
 vec2i_export API_DEF offset2axial(vector2i offset)
 {
     auto q = offset.x - (offset.y - (offset.y & 1)) / 2;
