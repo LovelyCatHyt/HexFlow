@@ -8,8 +8,10 @@ using UnityEngine.Tilemaps;
 [RequireComponent(typeof(MeshRenderer))]
 public class MeshGen : MonoBehaviour
 {
+
+    public HexMeshType gridType;
     [Min(0.001f)]
-    public float cellRadius;
+    public float cellRadius = 1;
     public Vector2Int origin;
     public Vector2Int gridSize;
 
@@ -22,6 +24,9 @@ public class MeshGen : MonoBehaviour
 
     private void Awake()
     {
+#if UNITY_EDITOR
+        if (_filter) _filter.sharedMesh = null;
+#endif
         Initialize();
     }
 
@@ -44,6 +49,14 @@ public class MeshGen : MonoBehaviour
 
         gridSize = Vector2Int.Max(gridSize, new Vector2Int(1, 1));
 
-        MeshGenerator.GenerateRectLayout(gridSize.x, gridSize.y, origin, cellRadius, _filter.sharedMesh);
+        MeshGenerator.GenerateRectLayout(gridSize.x, gridSize.y, origin, cellRadius, _filter.sharedMesh, gridType);
+    }
+
+
+    private void Reset()
+    {
+        if(_filter) _filter.sharedMesh = null;
+        OnValidate();
+        Debug.Log("Reset.");
     }
 }

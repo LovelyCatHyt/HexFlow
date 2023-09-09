@@ -4,32 +4,43 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
 
+[ExecuteAlways]
 public class Test : MonoBehaviour
 {
-    public Vector2Int offset;
+    public bool flag;
 
-    public static Vector2Int Offset2Axial(Vector2Int offset)
+    private void Awake()
     {
-        var q = offset.x - (offset.y - (offset.y & 1)) / 2;
-        var r = offset.y;
-        return new Vector2Int(q, r);
+        Debug.Log("Awake");
     }
 
-    private void Update()
+    private void OnEnable()
     {
-        int repeatTime = 100;
-        Profiler.BeginSample("Managed"); // ~ 0.002 ms
-        for (int i = 0; i < repeatTime; i++)
-        {
-            Offset2Axial(offset);
-        }
-        Profiler.EndSample();
-
-        Profiler.BeginSample("Native Interop"); // ~ 0.003 ms
-        for (int i = 0; i < repeatTime; i++)
-        {
-            HexMath.Offset2Axial(offset);
-        }
-        Profiler.EndSample();
+        Debug.Log("OnEnable");
     }
+
+    private void Start()
+    {
+        Debug.Log("Start");
+    }
+
+    private void OnDisable()
+    {
+        Debug.Log("OnDisable");
+    }
+
+    private void OnValidate()
+    {   
+        /*
+        Debug.Log($"OnValidate, " +
+        $"GetPrefabAssetType: {UnityEditor.PrefabUtility.GetPrefabAssetType(this)}, " +
+        $"GetPrefabInstanceStatus: {UnityEditor.PrefabUtility.GetPrefabInstanceStatus(gameObject)}");
+        */
+    }
+
+    private void OnDestroy()
+    {
+        Debug.Log("OnDestroy");
+    }
+
 }
