@@ -21,4 +21,21 @@
 #### 非网格点坐标计算
 由于 Axial 坐标与笛卡尔直角坐标系可以直接线性变换, 因此在几何运算时具有显著的优势. 提供了两个核心转换函数:
 
-// TODO
+## Mesh
+网格体相关, 主要是是各类网格的生成和调整
+### [mesh_generator.h](/HexFlowNative/Main/mesh_generator.h)
+提供多种六边形网格的生成算法, 不涉及内存分配.
+
+目前有下列变体:
+| 函数名 | 网格分布 | 顶点数/单元格 | 说明 |
+| - | :-: | - | - |
+| gen_rect_layout_a | ![UniformTriangle](DocResources/HexMeshType_UniformTriangle.svg) | 18 | 六个正三角形组成, 逆时针排列 |
+| gen_rect_layout_b | ![SymmetricalLeastTriangle](DocResources/HexMeshType_SymmetricalLeastTriangle.svg) | 12 | 一个大三角形+三个扁三角形组成 |
+
+两种变体都可以使用下图表示的纹理:
+
+![](DocResources/Ground2.svg)
+
+正三角形用中间部分, 扁的等腰三角形用右侧部分. 左侧扁三角形是为了图像的完整性, 保证交点附近的像素的对称.
+
+函数的参数中包含若干个指针, 函数的实现假设指针指向的内存空间恰好分配了需要的长度. 由于实际生成的顶点数需要计算, 因此额外提供了形如 `calc_num_of_rect_layout_x` 的函数, 用于计算总顶点数. 未来扩展新的六边形网格时, 也会提供对应的顶点数计算函数.
