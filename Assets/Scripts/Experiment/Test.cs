@@ -4,43 +4,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
 
-[ExecuteAlways]
 public class Test : MonoBehaviour
 {
-    public bool flag;
 
-    private void Awake()
+    
+    private void Update()
     {
-        Debug.Log("Awake");
-    }
+        MeshCollider meshCollider = GetComponent<MeshCollider>();
+        if (!meshCollider.sharedMesh) meshCollider.sharedMesh = GetComponent<MeshFilter>().sharedMesh;
 
-    private void OnEnable()
-    {
-        Debug.Log("OnEnable");
+        var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Input.GetMouseButtonUp(0))
+        {
+            
+            if (meshCollider.Raycast(ray, out var info, 114514f))
+            {
+                Debug.Log($"mouse hit at {info.point}");
+            }
+        }
     }
-
-    private void Start()
-    {
-        Debug.Log("Start");
-    }
-
-    private void OnDisable()
-    {
-        Debug.Log("OnDisable");
-    }
-
-    private void OnValidate()
-    {   
-        /*
-        Debug.Log($"OnValidate, " +
-        $"GetPrefabAssetType: {UnityEditor.PrefabUtility.GetPrefabAssetType(this)}, " +
-        $"GetPrefabInstanceStatus: {UnityEditor.PrefabUtility.GetPrefabInstanceStatus(gameObject)}");
-        */
-    }
-
-    private void OnDestroy()
-    {
-        Debug.Log("OnDestroy");
-    }
-
 }

@@ -12,10 +12,12 @@ namespace HexFlow.NativeCore
     {
         /// <summary>
         /// 均匀的三角形: 组成的网格整体上由全等的等边三角形均匀分布
+        /// <para>每格18顶点</para>
         /// </summary>
         UniformTriangle,
         /// <summary>
         /// 对称的最少三角形布局: 每个六边形仅由必须的4个三角形组成, 使用对称的1大3小布局
+        /// <para>每格12顶点</para>
         /// </summary>
         SymmetricalLeastTriangle
     }
@@ -25,13 +27,13 @@ namespace HexFlow.NativeCore
         public const string DllName = "Native_Main.dll";
 
         [DllImport(DllName, EntryPoint = "calc_num_of_rect_layout_a")]
-        public static extern int CalcNumOfRectLayoutA(int width, int height);
+        internal static extern int CalcNumOfRectLayoutA(int width, int height);
 
         [DllImport(DllName, EntryPoint = "gen_rect_layout_a")]
         internal static extern unsafe void GenerateRectLayoutA(Vector3* vertices, Vector3* normals, Vector2* uvs, int* indices, int width, int height, Vector2Int origin, float cell_size);
 
         [DllImport(DllName, EntryPoint = "calc_num_of_rect_layout_b")]
-        public static extern int CalcNumOfRectLayoutB(int width, int height);
+        internal static extern int CalcNumOfRectLayoutB(int width, int height);
 
         [DllImport(DllName, EntryPoint = "gen_rect_layout_b")]
         internal static extern unsafe void GenerateRectLayoutB(Vector3* vertices, Vector3* normals, Vector2* uvs, int* indices, int width, int height, Vector2Int origin, float cell_size);

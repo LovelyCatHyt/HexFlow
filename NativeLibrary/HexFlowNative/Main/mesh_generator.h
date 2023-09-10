@@ -2,13 +2,22 @@
 #include "pch.h"
 #include "hex_math.h"
 
-//typedef struct
-//{
-//    vector3f* vertices;
-//    vector3f* normals;
-//    // vector3f* tangents;
-//    vector2f* uvs;
-//}mesh_buffer;
+typedef struct
+{
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    unsigned char a;
+}color32;
+
+typedef struct
+{
+    float r;
+    float g;
+    float b;
+    float a;
+}color;
+
 
 extern "C"
 {
@@ -44,4 +53,23 @@ extern "C"
     /// <param name="cell_size">单元格大小, 即顶点到单元格中心的距离</param>
     void API_DEF gen_rect_layout_b(vector3f* vertices, vector3f* normals, vector2f* uvs, int* indices, int width, int height, vector2i origin, float cell_size);
 
+    /// <summary>
+    /// 根据源颜色数组设置目标顶点颜色数组
+    /// </summary>
+    /// <param name="dst">目标颜色数组, 长度为 length * vert_per_cell</param>
+    /// <param name="src">源颜色数组, 长度为 vert_per_cell</param>
+    /// <param name="vert_per_cell">每个源颜色对应的顶点数, 通常填3表示每3个顶点取同一个颜色</param>
+    /// <param name="length">源数组长度</param>
+    /// <returns></returns>
+    void API_DEF set_vert_color32_gridmap(color32* colors, color32* gridColors, int vert_per_cell, int length);
+
+    /// <summary>
+    /// 根据源颜色数组设置目标顶点颜色数组
+    /// </summary>
+    /// <param name="dst">目标颜色数组, 长度为 length * vert_per_cell</param>
+    /// <param name="src">源颜色数组, 长度为 vert_per_cell</param>
+    /// <param name="vert_per_cell">每个源颜色对应的顶点数, 通常填3表示每3个顶点取同一个颜色</param>
+    /// <param name="length">源数组长度</param>
+    /// <returns></returns>
+    void API_DEF set_vert_color_gridmap(color* colors, color* gridColors, int vert_per_cell, int length);
 }

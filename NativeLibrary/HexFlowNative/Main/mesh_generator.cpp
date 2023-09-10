@@ -83,7 +83,7 @@ void gen_rect_layout_a(vector3f* vertices, vector3f* normals, vector2f* uvs, int
     }
 }
 
-void API_DEF gen_rect_layout_b(vector3f* vertices, vector3f* normals, vector2f* uvs, int* indices, int width, int height, vector2i origin, float cell_size)
+void gen_rect_layout_b(vector3f* vertices, vector3f* normals, vector2f* uvs, int* indices, int width, int height, vector2i origin, float cell_size)
 {
     // 总顶点数
     auto num_vert = calc_num_of_rect_layout_b(width, height);
@@ -148,4 +148,27 @@ void API_DEF gen_rect_layout_b(vector3f* vertices, vector3f* normals, vector2f* 
     // 索引
     // 没有共享顶点的情况下非常简单
     for (size_t i = 0; i < num_vert; i++) indices[i] = i;
+}
+
+template<typename T>
+void repeat_copy(T* dst, T* src, int repeat, int length)
+{
+    for (size_t i = 0; i < length; i++)
+    {
+        auto dst_ptr = dst + repeat * i;
+        for (size_t dst_i = 0; dst_i < repeat; dst_i++)
+        {
+            dst_ptr[dst_i] = src[i];
+        }
+    }
+}
+
+void set_vert_color32_gridmap(color32* colors, color32* gridColors, int vert_per_cell, int length)
+{
+    repeat_copy(colors, gridColors, vert_per_cell, length);
+}
+
+void set_vert_color_gridmap(color* colors, color* gridColors, int vert_per_cell, int length)
+{
+    repeat_copy(colors, gridColors, vert_per_cell, length);
 }
