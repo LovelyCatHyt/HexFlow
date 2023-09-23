@@ -14,11 +14,12 @@ public class ClickBrush : MonoBehaviour
     {
         _filter = GetComponent<MeshFilter>();
         _chunkMesh = GetComponent<HexChunkMesh>();
+        Debug.Log($"Mesh vertex count: {_chunkMesh.GeneratedMesh.vertexCount}", this);
     }
 
     private void Start()
     {
-        Debug.Log($"Mesh vertex count: {_chunkMesh.GeneratedMesh.vertexCount}", this);
+        
     }
 
     private void OnMouseUpAsButton()
