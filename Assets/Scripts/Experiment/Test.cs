@@ -6,8 +6,6 @@ using UnityEngine.Profiling;
 
 public class Test : MonoBehaviour
 {
-
-    
     private void Update()
     {
         MeshCollider meshCollider = GetComponent<MeshCollider>();
