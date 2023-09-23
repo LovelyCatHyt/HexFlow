@@ -97,10 +97,9 @@ namespace HexFlow.ProceduralMesh
             _chunkSize = Vector2Int.Max(Vector2Int.one, _chunkSize);
         }
 
-        protected override void UpdateMeshNocheck()
+        protected override void GenerateMeshImpl(Mesh target)
         {
-            MeshGenerator.GenerateRectLayout(_chunkSize.x, _chunkSize.y, _origin, _radiuos, _filter.sharedMesh, _type);
-            MeshAvailable = true;
+            MeshGenerator.GenerateRectLayout(_chunkSize.x, _chunkSize.y, _origin, _radiuos, target, _type);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using HexFlow.NativeCore;
 using System.Diagnostics;
 
@@ -9,99 +10,75 @@ namespace HexFlow.ProceduralMesh
     /// <summary>
     /// 程序生成网格, 支持编辑器内即时预览
     /// </summary>
-    public class ProceduralMeshBase : MonoBehaviour
+    public abstract class ProceduralMeshBase : MonoBehaviour
     {
-       
-
+        private Mesh _mesh = null;
         /// <summary>
-        /// 网格可用
+        /// 已生成的网格. 保证返回一个根据当前参数生成的网格.
         /// </summary>
-        public bool MeshAvailable { get; protected set; } = false;
+        public Mesh GeneratedMesh
+        {
+            get
+            {
+                if (!_mesh) OnValidate();
+                return _mesh;
+            }
+        }
 
-        protected MeshFilter _filter;
+        public bool ShouldUpdateMeshFilter { get; private set; } = true;
 
-        /// <summary>
-        /// SendMessage cannot be called during Awake, CheckConsistency, or OnValidate
-        /// </summary>
-        private bool _readyForSendMsg = false;
+        private MeshFilter _filter = null;
 
         private void Awake()
         {
             _filter = GetComponent<MeshFilter>();
+            _mesh = null;
+            OnValidate();
         }
 
-        private void Start()
-        {
-            _readyForSendMsg = true;
-            Clear();
-        }
-
-        /// <summary>
-        /// 运行时也可以在该类及其派生类中调用, 含义扩展为: 定义该网格的参数修改时触发的方法
-        /// </summary>
         protected void OnValidate()
         {
-            OnParamCheck();
-            MeshAvailable = false;
-        }
-
-        private void LateUpdate()
-        {
-            if (!MeshAvailable) UpdateMesh();
-        }
-
-        private void OnDisable()
-        {
-            Clear();
-        }
-                /// <summary>
-        /// 初始化, 保证网格处于可访问状态
-        /// <para>可重复调用, 完成全部初始化内容则返回 true</para>
-        /// <para>在 Awake 阶段, 由于 Unity 的限制, 无法安全设置网格, 调用必定返回 false</para>
-        /// </summary>
-        protected bool Initialize()
-        {
-#if UNITY_EDITOR // 由于复制 GO 和打开 Prefab 的情况下, 这些引用可能会在某个阶段引用的是原对象, 因此直接用最稳妥的方案
-            _filter = GetComponent<MeshFilter>();
-            _filter.hideFlags = HideFlags.HideInInspector;
-#else
-            if(!_filter) _filter = GetComponent<MeshFilter>();
-            if (!_renderer) _renderer = GetComponent<MeshRenderer>();
-#endif
-            if (!_filter.sharedMesh && _readyForSendMsg)
+            if(_mesh == null)
             {
-                _filter.sharedMesh = new Mesh
+                _mesh = new Mesh
                 {
                     hideFlags = HideFlags.DontSave,
                     name = GetType().Name
                 };
             }
-
-            return _filter.sharedMesh;
+            OnParamCheck();
+            GenerateMesh();
         }
 
-        /// <summary>
-        /// 检查并修正网格生成参数, 非编辑器环境只需在参数的 Setter 中进行数据校验
-        /// </summary>
-        [Conditional("UNITY_EDITOR")]
-        protected virtual void OnParamCheck() { }
-
-        public void Clear()
+        private void LateUpdate()
         {
-            if (_filter && _readyForSendMsg)
+            // LateUpdate 是在所有运行环境下都能安全访问 MeshFilter.sharedMesh 的 Unity 消息
+            if (ShouldUpdateMeshFilter)
             {
-                _filter.sharedMesh = null;
-                MeshAvailable = false;
+                _filter.sharedMesh = GeneratedMesh;
+                ShouldUpdateMeshFilter = false;
             }
         }
 
-        protected virtual void UpdateMeshNocheck() { }
+        /// <summary>
+        /// 检测网格参数是否正确, 并将错误值修复为有效值.
+        /// <para>IsPlaying下建议用 Setter 和 Attribute(如<see cref="MinAttribute"/>, <see cref="RangeAttribute"/>) 校验参数, 但某些特殊的判定规则在 Inspector 中无法简单实现时, 可以用该方法校验</para>
+        /// </summary>
+        protected virtual void OnParamCheck() { }
 
-        public void UpdateMesh()
+        /// <summary>
+        /// 生成网格, 并更新标记用的布尔值
+        /// </summary>
+        private void GenerateMesh()
         {
-            if (Initialize()) UpdateMeshNocheck();
+            GenerateMeshImpl(GeneratedMesh);
+            ShouldUpdateMeshFilter = true;
         }
 
-
+        /// <summary>
+        /// 生成网格的具体流程
+        /// </summary>
+        /// <param name="target"></param>
+        protected abstract void GenerateMeshImpl(Mesh target);
     }
 }
