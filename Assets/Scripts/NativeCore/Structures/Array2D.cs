@@ -15,6 +15,9 @@ namespace HexFlow.NativeCore.Structures
 
         public readonly Vector2Int Size;
 
+        public int Width => Size.x;
+        public int Height => Size.y;
+
         public Array2D(int width, int height)
         {
             if (width < 1 || height < 1)
@@ -26,12 +29,23 @@ namespace HexFlow.NativeCore.Structures
             Data = new NativeArray<T>(width * height, Allocator.Persistent);
         }
 
+        public Array2D(Vector2Int size) : this(size.x, size.y) { }
+
+        public void Fill(T value)
+        {
+            var len = Width * Height;
+            for (int i = 0; i < len; i++)
+            {
+                this[i] = value;
+            }
+        }
+
         public void Dispose()
         {
             Data.Dispose();
         }
 
-        public T this[int index]
+        public virtual T this[int index]
         {
             get => Data[index];
             set
@@ -47,19 +61,19 @@ namespace HexFlow.NativeCore.Structures
             }
         }
 
-        public T this[int x, int y]
+        public virtual T this[int x, int y]
         {
             get => this[y * Size.x + x];
             set => this[y * Size.x + x] = value;
         }
 
-        public T this[Vector2Int pos]
+        public virtual T this[Vector2Int pos]
         {
             get => this[pos.x, pos.y];
             set => this[pos.x, pos.y] = value;
         }
 
-        public T[] ToArray()
+        public virtual T[] ToArray()
         {
             return Data.ToArray();
         }
