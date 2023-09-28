@@ -16,8 +16,8 @@ public class ClickBrush : MonoBehaviour
 
     private HexChunkMesh _chunkMesh;
     private Collider _collider;
-    
-    private Array2D<Color> _colorMap;
+
+    private Array2DAuto<Color> _colorMap;
     // private Vector2Int _lastOrigin = Vector2Int.zero;
 
     private void Awake()
@@ -25,7 +25,7 @@ public class ClickBrush : MonoBehaviour
         _chunkMesh = GetComponent<HexChunkMesh>();
         if (useBoxCollider) _collider = gameObject.AddComponent<BoxCollider>();
         else _collider = gameObject.AddComponent<MeshCollider>();
-        
+
     }
 
     private void Start()
@@ -48,32 +48,15 @@ public class ClickBrush : MonoBehaviour
 
     private void RefreshColorMap()
     {
-        var tempMap = new Array2D<Color>(_chunkMesh.ChunkSize);
-        tempMap.Fill(colorRight);
-        if (_colorMap != null) _colorMap.Dispose();
-        _colorMap = tempMap;
-
-        // TODO: 需要尽可能保留旧的数据
+        if (_colorMap == null)
         {
-            /*
-            if(_colorMap == null)
-            {
-                _colorMap = tempMap;
-                return;
-            }
-
-
-            var originDelta = _chunkMesh.Origin - _lastOrigin;
-
-            for (int row = 0; row < tempMap.Size.y; row++)
-            {
-                for (int col = 0; col < tempMap.Size.x; col++)
-                {
-
-                }
-            }
-            */
+            _colorMap = new Array2DAuto<Color>(_chunkMesh.ChunkSize, -_chunkMesh.Origin, colorRight);
         }
+        else
+        {
+            _colorMap.ResetRange(_chunkMesh.Origin, _chunkMesh.Origin + _chunkMesh.ChunkSize - Vector2Int.one);
+        }
+
     }
 
     private void RefreshCollider()
@@ -95,7 +78,7 @@ public class ClickBrush : MonoBehaviour
             Vector3 size2D = max - min;
             boxCollider.size = new Vector3(size2D.x, size2D.y, 0.1f);
         }
-        else if(!useBoxCollider && _collider is MeshCollider meshCollider)
+        else if (!useBoxCollider && _collider is MeshCollider meshCollider)
         {
             meshCollider.sharedMesh = _chunkMesh.GeneratedMesh;
         }
@@ -111,18 +94,40 @@ public class ClickBrush : MonoBehaviour
         MeshModifier.SetMeshColor(mesh, _chunkMesh.Type, _colorMap.Data);
     }
 
-    private void OnMouseUpAsButton()
+    private void Update()
     {
-        var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out var Hit))
+        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
         {
-            var localPos = transform.InverseTransformPoint(Hit.point);
-            var axial = HexMath.Position2Axial(localPos, _chunkMesh.Radiuos);
-            var offset = HexMath.Axial2Offset(axial);
-            Debug.Log($"Offset position = {offset}");
-            var mapPosition = offset - _chunkMesh.Origin;
-            _colorMap[mapPosition] = Input.GetMouseButtonUp(0) ? colorLeft : colorRight;
-            ApplyColor();
+            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out var Hit))
+            {
+                var localPos = transform.InverseTransformPoint(Hit.point);
+                var axial = HexMath.Position2Axial(localPos, _chunkMesh.Radiuos);
+                var offset = HexMath.Axial2Offset(axial);
+                Debug.Log($"Offset position = {offset}");
+                _colorMap[offset] = Input.GetMouseButtonDown(0) ? colorLeft : colorRight;
+                ApplyColor();
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            _chunkMesh.Origin += new Vector2Int(-1, 0);
+        }
+
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            _chunkMesh.Origin += new Vector2Int(1, 0);
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            _chunkMesh.Origin += new Vector2Int(0, 1);
+        }
+
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            _chunkMesh.Origin += new Vector2Int(0, -1);
         }
     }
 }

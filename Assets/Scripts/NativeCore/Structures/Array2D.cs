@@ -11,9 +11,14 @@ namespace HexFlow.NativeCore.Structures
     /// </summary>
     public class Array2D<T> : IDisposable where T : unmanaged
     {
-        public NativeArray<T> Data { get; private set; }
+        public NativeArray<T> Data { get; protected set; }
 
-        public readonly Vector2Int Size;
+        public Vector2Int Size { get; protected set; }
+
+        /// <summary>
+        /// Data.Length 的快捷方式
+        /// </summary>
+        public int Length => Data.Length;
 
         public int Width => Size.x;
         public int Height => Size.y;
@@ -25,7 +30,7 @@ namespace HexFlow.NativeCore.Structures
                 throw new ArgumentException($"Both width and height should no less than 1, but get width={width}, height={height}");
             }
 
-            Size.x = width; Size.y = height;
+            Size = new Vector2Int(width, height);
             Data = new NativeArray<T>(width * height, Allocator.Persistent);
         }
 
@@ -54,10 +59,8 @@ namespace HexFlow.NativeCore.Structures
                 {
                     throw new ArgumentOutOfRangeException("index");
                 }
-                unsafe
-                {
-                    Data.Get()[index] = value;
-                }
+                var temp = Data;
+                temp[index] = value; // 直接用 Data[i] 无法写入, 会提示不可写入返回值
             }
         }
 

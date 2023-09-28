@@ -467,6 +467,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8c1f5d807178494893d033f344f52f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useBoxCollider: 0
+  colorLeft: {r: 1, g: 1, b: 1, a: 1}
+  colorRight: {r: 1, g: 0.86190844, b: 0.2584905, a: 1}
 --- !u!114 &3243087352747063161
 MonoBehaviour:
   m_ObjectHideFlags: 0
