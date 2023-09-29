@@ -1,0 +1,3 @@
+[submodule "Assets/Scripts/Unitilities"]
+	path = Assets/Scripts/Unitilities
+	url = https://github.com/LovelyCatHyt/Unitilities.git
