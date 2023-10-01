@@ -1,9 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
-using HexFlow.NativeCore;
-using System.Diagnostics;
 using UnityEngine.Events;
 
 namespace HexFlow.ProceduralMesh

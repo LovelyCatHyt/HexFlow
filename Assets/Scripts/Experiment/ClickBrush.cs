@@ -2,8 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using HexFlow.ProceduralMesh;
 using HexFlow.NativeCore;
-using HexFlow.NativeCore.Structures;
-using System;
 
 [RequireComponent(typeof(HexChunkMesh))]
 public class ClickBrush : MonoBehaviour

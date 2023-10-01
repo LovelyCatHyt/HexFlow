@@ -1,8 +1,4 @@
-using HexFlow.NativeCore;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 [ExecuteAlways]
 public class Test : MonoBehaviour
