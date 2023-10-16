@@ -191,6 +191,22 @@ typedef vector2_template<int> vector2i;
 typedef vector3_template<int> vector3i;
 typedef vector3_template<float> vector3f;
 
+typedef struct
+{
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    unsigned char a;
+}color32;
+
+typedef struct
+{
+    float r;
+    float g;
+    float b;
+    float a;
+}color;
+
 // math utils -----------------------------------------------
 
 /// <summary>

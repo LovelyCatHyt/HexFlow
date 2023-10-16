@@ -2,23 +2,6 @@
 #include "pch.h"
 #include "hex_math.h"
 
-typedef struct
-{
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-    unsigned char a;
-}color32;
-
-typedef struct
-{
-    float r;
-    float g;
-    float b;
-    float a;
-}color;
-
-
 extern "C"
 {
     /// <summary>
