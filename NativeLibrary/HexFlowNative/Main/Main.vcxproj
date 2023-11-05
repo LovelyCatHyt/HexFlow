@@ -162,13 +162,17 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="chunked_2d_container.h" />
+    <ClInclude Include="chunked_2d_container_export.hpp" />
     <ClInclude Include="hex_math.h" />
     <ClInclude Include="map.h" />
+    <ClInclude Include="math.hpp" />
     <ClInclude Include="math_type.h" />
     <ClInclude Include="mesh_generator.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="chunked_2d_container.cpp" />
     <ClCompile Include="hex_math.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="mesh_generator.cpp" />
@@ -180,6 +184,25 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="cpp-export-task.json">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)Tools\CppClassExporter\$(Configuration)\net6.0\CppClassExporter.exe %(FullPath)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generate C Export Function</Message>
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BuildInParallel>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)Tools\CppClassExporter\$(Configuration)\net6.0\CppClassExporter.exe %(FullPath)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generate C Export Function</Message>
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BuildInParallel>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)Tools\CppClassExporter\$(Configuration)\net6.0\CppClassExporter.exe %(FullPath)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generate C Export Function</Message>
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</BuildInParallel>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)Tools\CppClassExporter\$(Configuration)\net6.0\CppClassExporter.exe %(FullPath)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generate C Export Function</Message>
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</BuildInParallel>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">chunked_2d_container_export.hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">chunked_2d_container_export.hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">chunked_2d_container_export.hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">chunked_2d_container_export.hpp</Outputs>
+    </CustomBuild>
     <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

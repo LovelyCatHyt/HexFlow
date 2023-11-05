@@ -50,9 +50,9 @@ int API_DEF axial_distance(vector2i a, vector2i b)
 
 vec3i_export API_DEF cube_round(vector3f cube_frac)
 {
-    auto q = round(cube_frac.x);
-    auto r = round(cube_frac.y);
-    auto s = round(cube_frac.z);
+    auto q = (int)round(cube_frac.x);
+    auto r = (int)round(cube_frac.y);
+    auto s = (int)round(cube_frac.z);
 
     auto q_diff = abs(q - cube_frac.x);
     auto r_diff = abs(r - cube_frac.y);

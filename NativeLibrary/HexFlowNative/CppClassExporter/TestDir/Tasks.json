@@ -1,0 +1,15 @@
+{
+	"actions": [
+		{
+			"sourceHeaderPath": "./test.hpp",
+			"exportHeaderPath": "./output.h"
+		}
+	],
+	"strReplaceMap": [
+		{
+			"Key": " API_DEF ",
+			"Value": " "
+		}
+	],
+	"cExportDecorator" : "API_DEF"
+}

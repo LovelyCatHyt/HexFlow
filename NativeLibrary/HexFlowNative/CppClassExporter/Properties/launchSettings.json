@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CppClassExporter": {
+        "commandName": "Project",
+        "workingDirectory": "$(ProjectDir)TestDir/"
+    }
+  }
+}

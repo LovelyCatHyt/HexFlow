@@ -191,6 +191,26 @@ typedef vector2_template<int> vector2i;
 typedef vector3_template<int> vector3i;
 typedef vector3_template<float> vector3f;
 
+template<typename T>
+struct std::hash<vector2_template<T>>
+{
+    size_t operator()(const vector2_template<T> vec2) const
+    {
+        std::hash<T> h;
+        return h(vec2.x) ^ 31 + h(vec2.y);
+    }
+};
+
+template<typename T>
+struct std::hash<vector3_template<T>>
+{
+    size_t operator()(const vector3_template<T> vec3) const
+    {
+        std::hash<T> h;
+        return h(vec3.xy) ^ 31 + h(vec3.z);
+    }
+};
+
 typedef struct
 {
     unsigned char r;

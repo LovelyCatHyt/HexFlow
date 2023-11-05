@@ -30,6 +30,15 @@
     <ClInclude Include="map.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="chunked_2d_container.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="chunked_2d_container_export.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="math.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -44,8 +53,14 @@
     <ClCompile Include="map.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="chunked_2d_container.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="cpp-export-task.json" />
   </ItemGroup>
 </Project>

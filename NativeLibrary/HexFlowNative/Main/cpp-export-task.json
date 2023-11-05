@@ -1,0 +1,15 @@
+{
+	"actions": [
+        {
+            "sourceHeaderPath": "./chunked_2d_container.h",
+            "exportHeaderPath": "./chunked_2d_container_export.hpp"
+        }
+	],
+	"strReplaceMap": [
+		{
+			"Key": " API_DEF ",
+			"Value": " "
+		}
+	],
+	"cExportDecorator" : "API_DEF"
+}

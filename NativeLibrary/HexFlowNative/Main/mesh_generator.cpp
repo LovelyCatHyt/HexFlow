@@ -40,9 +40,9 @@ void gen_rect_layout_a(vector3f* vertices, vector3f* normals, vector2f* uvs, int
 
     // 为了能尽可能访问连续内存地址, 三个数组分开赋值
     // 坐标
-    for (size_t row = 0; row < height; row++)
+    for (int row = 0; row < height; row++)
     {
-        for (size_t col = 0; col < width; col++)
+        for (int col = 0; col < width; col++)
         {
             auto axial = offset2axial(vector2i(col + origin.x, row + origin.y));
             auto center = (vector2f)axial2position(axial);
@@ -79,7 +79,7 @@ void gen_rect_layout_a(vector3f* vertices, vector3f* normals, vector2f* uvs, int
     // 拓扑结构为三角形的情况下非常简单
     for (size_t i = 0; i < num_vert; i++)
     {
-        indices[i] = i;
+        indices[i] = (int)i;
     }
 }
 
@@ -100,9 +100,9 @@ void gen_rect_layout_b(vector3f* vertices, vector3f* normals, vector2f* uvs, int
 
     // 为了能尽可能访问连续内存地址, 三个数组分开赋值
     // 坐标
-    for (size_t row = 0; row < height; row++)
+    for (int row = 0; row < height; row++)
     {
-        for (size_t col = 0; col < width; col++)
+        for (int col = 0; col < width; col++)
         {
             auto axial = offset2axial(vector2i(col + origin.x, row + origin.y));
             auto center = (vector2f)axial2position(axial);
@@ -147,7 +147,7 @@ void gen_rect_layout_b(vector3f* vertices, vector3f* normals, vector2f* uvs, int
 
     // 索引
     // 没有共享顶点的情况下非常简单
-    for (size_t i = 0; i < num_vert; i++) indices[i] = i;
+    for (size_t i = 0; i < num_vert; i++) indices[i] = (int)i;
 }
 
 template<typename T>
