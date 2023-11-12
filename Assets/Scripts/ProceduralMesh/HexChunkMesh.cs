@@ -33,15 +33,15 @@ namespace HexFlow.ProceduralMesh
         /// <summary>
         /// 半径: 顶点到中心的距离
         /// </summary>
-        public float Radiuos
+        public float Radius
         {
-            get => _radiuos;
+            get => _radius;
             set
             {
                 value = Mathf.Max(0.001f, value);
-                if (value != _radiuos)
+                if (value != _radius)
                 {
-                    _radiuos = value;
+                    _radius = value;
                     OnValidate();
                 }
             }
@@ -49,7 +49,7 @@ namespace HexFlow.ProceduralMesh
         [Tooltip("半径: 顶点到中心的距离")]
         [Min(0.001f)]
         [SerializeField]
-        protected float _radiuos = 1;
+        protected float _radius = 1;
 
         /// <summary>
         /// 块的尺寸
@@ -97,7 +97,7 @@ namespace HexFlow.ProceduralMesh
 
         protected override void GenerateMeshImpl(Mesh target)
         {
-            MeshGenerator.GenerateRectLayout(_chunkSize.x, _chunkSize.y, _origin, _radiuos, target, _type);
+            MeshGenerator.GenerateRectLayout(_chunkSize.x, _chunkSize.y, _origin, _radius, target, _type);
         }
     }
 }

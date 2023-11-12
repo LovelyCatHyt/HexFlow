@@ -26,6 +26,13 @@ namespace HexFlow.NativeCore
     {
         public const string DllName = "Native_Main.dll";
 
+        public static int GetVertNum(this HexMeshType type) => type switch
+        {
+            HexMeshType.UniformTriangle => 18,
+            HexMeshType.SymmetricalLeastTriangle => 12,
+            _ => 12,
+        };
+
         [DllImport(DllName, EntryPoint = "calc_num_of_rect_layout_a")]
         internal static extern int CalcNumOfRectLayoutA(int width, int height);
 

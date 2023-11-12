@@ -100,7 +100,7 @@ public class ClickBrush : MonoBehaviour
             if (Physics.Raycast(ray, out var Hit))
             {
                 var localPos = transform.InverseTransformPoint(Hit.point);
-                var axial = HexMath.Position2Axial(localPos, _chunkMesh.Radiuos);
+                var axial = HexMath.Position2Axial(localPos, _chunkMesh.Radius);
                 var offset = HexMath.Axial2Offset(axial);
                 Debug.Log($"Offset position = {offset}");
                 _colorMap[offset] = Input.GetMouseButtonDown(0) ? colorLeft : colorRight;

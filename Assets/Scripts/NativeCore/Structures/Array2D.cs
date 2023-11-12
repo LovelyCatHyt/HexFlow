@@ -4,10 +4,12 @@ using UnityEngine;
 
 namespace HexFlow.NativeCore.Structures
 {
+
     /// <summary>
     /// 支持多种下标索引的 2D 数组, 内部使用行主序的 <see cref="NativeArray{T}"/>
     /// </summary>
-    public class Array2D<T> : IDisposable where T : unmanaged
+    public class Array2D<T> : IDisposable, INative2DArray<T>
+        where T : unmanaged
     {
         public NativeArray<T> Data { get; protected set; }
 
@@ -20,6 +22,8 @@ namespace HexFlow.NativeCore.Structures
 
         public int Width => Size.x;
         public int Height => Size.y;
+
+        public unsafe IntPtr RawPtr => (IntPtr)Data.Get();
 
         public Array2D(int width, int height)
         {

@@ -1,5 +1,3 @@
-using HexFlow.NativeCore;
-using HexFlow.NativeCore.Structures;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,7 +16,7 @@ namespace HexFlow.NativeCore.Structures
         /// <summary>
         /// 生成一个区块
         /// </summary>
-        void Generate(Vector2Int chunkPos, IntPtr dataPtr, int seed);
+        void Generate(Vector2Int chunkPos, IntPtr dataPtr, int seed, int chunkSize);
     }
 
     //public interface IChunkBatchGenerator<T> where T : unmanaged
@@ -29,7 +27,73 @@ namespace HexFlow.NativeCore.Structures
     //    void Generate(Vector2Int start, Vector2Int end, int seed);
     //}
 
+    /// <summary>
+    /// 复制默认值的区块生成器
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class CopyDefaultGenerator<T> : IChunkGenerator<T> where T : unmanaged
+    {
+        T @default = default(T);
 
+        public CopyDefaultGenerator(T @default = default)
+        {
+            this.@default = @default;
+        }
+
+        public void Generate(Vector2Int chunkPos, IntPtr dataPtr, int seed, int chunkSize)
+        {
+            unsafe
+            {
+                T* typedPtr = (T*)dataPtr;
+                int elementCount = chunkSize * chunkSize;
+                for (int i = 0; i < elementCount; ++i)
+                {
+                    typedPtr[i] = @default;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 区块数据代理, 提供一个数组形式的访问器用于简单的读写操作
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class ChunkDataProxy<T> : INative2DArray<T>
+        where T : unmanaged
+    {
+        private IntPtr _data;
+
+        public Vector2Int Size { get; set; }
+
+        public ChunkDataProxy(IntPtr data, Vector2Int size)
+        {
+            _data = data;
+            Size = size;
+        }
+
+        public ChunkDataProxy(IntPtr data,  int size)
+        {
+            _data = data;
+            Size = new Vector2Int(size, size);
+        }
+
+        public IntPtr RawPtr => _data;
+
+        public T this[Vector2Int pos] { get => this[pos.x, pos.y]; set => this[pos.x, pos.y] = value; }
+        public unsafe T this[int x, int y]
+        {
+            get
+            {
+                var typedPtr = (T*)_data;
+                return typedPtr[y * Size.x + x];
+            }
+            set
+            {
+                var typedPtr = (T*)_data;
+                typedPtr[y * Size.x + x] = value;
+            }
+        }
+    }
 
     /// <summary>
     /// 按区块存储的, 以2D坐标索引的容器
@@ -78,6 +142,7 @@ namespace HexFlow.NativeCore.Structures
                 Ntv.IterReset(_ptr, _iter);
             }
         }
+               
 
         /// <summary>
         /// 区块操作
@@ -87,6 +152,8 @@ namespace HexFlow.NativeCore.Structures
         public delegate void ChunAction(Vector2Int chunkPos, IntPtr chunkData);
 
         public readonly int ChunkSize = 32;
+
+        public readonly int ElementCountPerChunk;
 
         public int ChunkCount => Ntv.ChunkCount(_ptr);
 
@@ -112,16 +179,23 @@ namespace HexFlow.NativeCore.Structures
         /// <summary>
         /// Native 实现的对象指针
         /// </summary>
+        public IntPtr NativePtr => _ptr;
+
+        /// <summary>
+        /// Native 实现的对象指针
+        /// </summary>
         private IntPtr _ptr;
 
         // 不太确定在容器内跟踪区块数据更新的必要性, 先不做
         // public event ChunkEvent onChunkUpdate;
 
 
-        public Chunked2DContainer(T defaultValue, int seed = 0)
+        public Chunked2DContainer(T defaultValue, int seed = 0, int chunkSize = 32)
         {
             this.defaultValue = defaultValue;
             this.seed = seed;
+            ChunkSize = chunkSize;
+            ElementCountPerChunk = ChunkSize * ChunkSize;
             _ptr = Ntv.Ctor_0(ChunkSize, UnsafeUtils.SizeOf<T>());
             Generate(Vector2Int.zero);
         }
@@ -177,6 +251,13 @@ namespace HexFlow.NativeCore.Structures
         //}
         #endregion
 
+        public Vector2Int ToCellPos(Vector2Int chunkPos) => chunkPos * ChunkSize;
+
+        public Vector2Int ToChunkPos(Vector2Int cellPos)
+        {
+            return new Vector2Int(MathTool.FloorDiv(cellPos.x, ChunkSize), MathTool.FloorDiv(cellPos.y, ChunkSize));
+        }
+
         /// <summary>
         /// 在指定区块坐标上生成区块
         /// <para>如果该区块已创建, 会覆盖已有的数据</para>
@@ -193,7 +274,7 @@ namespace HexFlow.NativeCore.Structures
                 targetChunkData = Ntv.GetChunkData(_ptr, chunkPos);
             }
 
-            if (chunkGenerator != null) chunkGenerator.Generate(chunkPos, targetChunkData, seed);
+            if (chunkGenerator != null) chunkGenerator.Generate(chunkPos, targetChunkData, seed, ChunkSize);
 
             onChunkCreated?.Invoke(chunkPos, Ntv.GetChunkData(_ptr, chunkPos));
         }
@@ -215,7 +296,12 @@ namespace HexFlow.NativeCore.Structures
             }
         }
 
-        public bool ExistChunk(Vector2Int chunkPos) 
+        /// <summary>
+        /// 指定坐标的区块是否存在
+        /// </summary>
+        /// <param name="chunkPos"></param>
+        /// <returns></returns>
+        public bool ExistChunk(Vector2Int chunkPos)
         {
             return Ntv.ExistChunk(_ptr, chunkPos);
         }
@@ -225,7 +311,7 @@ namespace HexFlow.NativeCore.Structures
         /// </summary>
         public bool Remove(Vector2Int pos)
         {
-            if(ExistChunk(pos))
+            if (ExistChunk(pos))
             {
                 onBeforeChunkRemoved?.Invoke(pos, Ntv.GetChunkData(_ptr, pos));
                 return Ntv.RemoveChunk(_ptr, pos);
@@ -238,6 +324,11 @@ namespace HexFlow.NativeCore.Structures
             return Ntv.GetChunkData(_ptr, chunkPos);
         }
 
+        public INative2DArray<T> GetChunkAsArray(Vector2Int chunkPos)
+        {
+            return new ChunkDataProxy<T>(GetChunk(chunkPos), ChunkSize);
+        }
+
         ~Chunked2DContainer()
         {
             Dispose();
@@ -245,7 +336,15 @@ namespace HexFlow.NativeCore.Structures
 
         public void Dispose()
         {
-            if (_ptr != IntPtr.Zero) Ntv.Dtor(_ptr);
+            if (_ptr != IntPtr.Zero)
+            {
+                foreach(var kv in this)
+                {
+                    Remove(kv.Key);
+                }
+
+                Ntv.Dtor(_ptr);
+            }
             _ptr = IntPtr.Zero;
         }
 
