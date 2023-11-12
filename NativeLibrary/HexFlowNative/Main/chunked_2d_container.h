@@ -26,6 +26,8 @@ public:
         chunk_data_size = chunk_size * chunk_size * element_size;
     }
 
+    ~chunked_2d_container();
+
     int chunk_count() { return (int)_map.size(); }
 
     bool exist_chunk(vec2i_export chunk_pos) { return _map.contains(chunk_pos); }
@@ -36,7 +38,26 @@ public:
 
     void* create_chunk(vec2i_export chunk_pos);
 
+    bool remove_chunk(vec2i_export chunk_pos);
+
     void* get_cell_data(vec2i_export cell_pos);
 
     void set_cell_data(vec2i_export cell_pos, void* cell_data);
+
+#pragma region Iterator
+    void* create_iter();
+
+    static void iter_delete(void* iter_raw);
+
+    static void iter_advance(void* iter_raw);
+
+    bool iter_valid(void* iter_raw);
+
+    static vec2i_export iter_key(void* iter_raw);
+
+    static void* iter_value(void* iter_raw);
+
+    void iter_reset(void* iter_raw);
+#pragma endregion
 };
+

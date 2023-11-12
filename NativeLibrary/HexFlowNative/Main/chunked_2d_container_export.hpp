@@ -35,6 +35,10 @@ extern "C"{
 	{
 		((chunked_2d_container*)this_raw)->create_chunk(chunk_pos);
 	}
+	bool API_DEF chunked_2d_container_remove_chunk(void* this_raw, vec2i_export chunk_pos)
+	{
+		return ((chunked_2d_container*)this_raw)->remove_chunk(chunk_pos);
+	}
 	void* API_DEF chunked_2d_container_get_cell_data(void* this_raw, vec2i_export cell_pos)
 	{
 		((chunked_2d_container*)this_raw)->get_cell_data(cell_pos);
@@ -42,6 +46,34 @@ extern "C"{
 	void API_DEF chunked_2d_container_set_cell_data(void* this_raw, vec2i_export cell_pos, void* cell_data)
 	{
 		((chunked_2d_container*)this_raw)->set_cell_data(cell_pos, cell_data);
+	}
+	void* API_DEF chunked_2d_container_create_iter(void* this_raw)
+	{
+		((chunked_2d_container*)this_raw)->create_iter();
+	}
+	bool API_DEF chunked_2d_container_iter_valid(void* this_raw, void* iter_raw)
+	{
+		return ((chunked_2d_container*)this_raw)->iter_valid(iter_raw);
+	}
+	void API_DEF chunked_2d_container_iter_reset(void* this_raw, void* iter_raw)
+	{
+		((chunked_2d_container*)this_raw)->iter_reset(iter_raw);
+	}
+	void API_DEF chunked_2d_container_iter_delete(void* iter_raw)
+	{
+		chunked_2d_container::iter_delete(iter_raw);
+	}
+	void API_DEF chunked_2d_container_iter_advance(void* iter_raw)
+	{
+		chunked_2d_container::iter_advance(iter_raw);
+	}
+	vec2i_export API_DEF chunked_2d_container_iter_key(void* iter_raw)
+	{
+		return chunked_2d_container::iter_key(iter_raw);
+	}
+	void* API_DEF chunked_2d_container_iter_value(void* iter_raw)
+	{
+		chunked_2d_container::iter_value(iter_raw);
 	}
 }
 

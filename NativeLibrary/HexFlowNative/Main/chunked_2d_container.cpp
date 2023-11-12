@@ -4,9 +4,19 @@
 #include "math.hpp"
 #include "chunked_2d_container.h"
 
+using iterator = std::unordered_map<vector2i, void*>::iterator;
+
 vector2i chunked_2d_container::cell2chunk(vector2i chunk_pos)
 {
     return vector2i(floor_div(chunk_pos.x, chunk_size), floor_div(chunk_pos.y, chunk_size));
+}
+
+chunked_2d_container::~chunked_2d_container()
+{
+    for (auto& kv : _map)
+    {    
+        free(kv.second);
+    }
 }
 
 bool chunked_2d_container::exist_cell(vec2i_export cell_pos)
@@ -33,6 +43,14 @@ void* chunked_2d_container::create_chunk(vec2i_export chunk_pos)
         _map.emplace(chunk_pos, malloc(chunk_data_size));
     }
     return _map[chunk_pos];
+}
+
+bool chunked_2d_container::remove_chunk(vec2i_export chunk_pos)
+{
+    if (!_map.contains(chunk_pos)) return false;
+    free(_map[chunk_pos]);
+    _map.erase(chunk_pos);
+    return true;
 }
 
 void* chunked_2d_container::get_cell_data(vec2i_export cell_pos)
@@ -62,4 +80,46 @@ void chunked_2d_container::set_cell_data(vec2i_export cell_pos, void* cell_data)
 
     auto cell_ptr = (char*)chunk_head + (element_size * element_offset);
     memcpy(cell_ptr, cell_data, element_size);
+}
+
+void* chunked_2d_container::create_iter()
+{
+    auto* it = new iterator();
+    *it = _map.begin();
+    return it;
+}
+
+void chunked_2d_container::iter_advance(void* iter_raw)
+{
+    auto it = (iterator*)iter_raw;
+    ++*it;
+}
+
+bool chunked_2d_container::iter_valid(void* iter_raw)
+{
+    auto it = (iterator*)iter_raw;
+    return *it != _map.end();
+}
+
+vec2i_export chunked_2d_container::iter_key(void* iter_raw)
+{
+    auto it = (iterator*)iter_raw;
+    return (vector2i)(*it)->first;
+}
+
+void* chunked_2d_container::iter_value(void* iter_raw)
+{
+    auto it = (iterator*)iter_raw;
+    return (*it)->second;
+}
+
+void chunked_2d_container::iter_reset(void* iter_raw)
+{
+    auto it = (iterator*)iter_raw;
+    *it = _map.begin();
+}
+
+void chunked_2d_container::iter_delete(void* iter_raw)
+{
+    delete (iterator*)iter_raw;
 }
