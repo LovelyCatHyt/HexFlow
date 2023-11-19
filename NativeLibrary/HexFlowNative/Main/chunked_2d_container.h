@@ -30,7 +30,7 @@ public:
 
     int chunk_count() { return (int)_map.size(); }
 
-    bool exist_chunk(vec2i_export chunk_pos) { return _map.contains(chunk_pos); }
+    bool exist_chunk(vec2i_export chunk_pos);
 
     bool exist_cell(vec2i_export cell_pos);
 

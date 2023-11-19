@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Antlr4.Runtime;
@@ -13,6 +13,7 @@ namespace CppClassExporter.Exporter
     {
         [JsonInclude] public string sourceHeaderPath;
         [JsonInclude] public string? exportHeaderPath;
+        [JsonInclude] public string? exportImplPath;
         [JsonInclude] public string? dllFile;
         [JsonInclude] public string? exportCSharpPath;
         [JsonInclude] public bool genearteNonStaticClass;
@@ -26,9 +27,10 @@ namespace CppClassExporter.Exporter
             genearteNonStaticClass = false;
         }
 
-        public ExportAction(string sourceHeaderPath, string? exportHeaderPath = null, string? dllFile = null, string? exportCSharpPath = null, bool genearteNonStaticClass = false)
+        public ExportAction(string sourceHeaderPath, string? exportHeaderPath = null, string? exportImplPath = null, string? dllFile = null, string? exportCSharpPath = null, bool genearteNonStaticClass = false)
         {
             this.sourceHeaderPath = sourceHeaderPath;
+            this.exportImplPath = exportImplPath;
             this.exportCSharpPath = exportHeaderPath;
             this.dllFile = dllFile;
             this.exportCSharpPath = exportCSharpPath;
@@ -49,6 +51,9 @@ namespace CppClassExporter.Exporter
 
             exportHeaderPath ??= $"{fileName}.export.h";
             exportHeaderPath = GetFinalPath(exportHeaderPath, curDir);
+
+            exportImplPath ??= $"{fileName}.export.cpp";
+            exportImplPath = GetFinalPath(exportImplPath, curDir);
 
             dllFile ??= $"{fileName}.dll";
 
@@ -79,9 +84,32 @@ namespace CppClassExporter.Exporter
                 }
 
                 exporter.LoadTypeMap(_typeMap);
+
                 try
                 {
-                    exporter.WriteCFile(exportHeaderPath!);
+                    exporter.WriteCDeclFile(exportHeaderPath!);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error exporting CFile of class {decl.name} in {sourceHeaderPath}:");
+                    Console.WriteLine(e);
+                    allSuccess = false;
+                    continue;
+                }
+
+                using (var file = File.Open(exportImplPath!, FileMode.OpenOrCreate))
+                {
+                    if (file == null)
+                    {
+                        Console.WriteLine($"OpenOrCreate File failed at \"{exportHeaderPath}\"");
+                        allSuccess = false;
+                        continue;
+                    }
+                }
+
+                try
+                {
+                    exporter.WriteCDefFile(exportImplPath!, exportHeaderPath!);
                 }
                 catch (Exception e)
                 {

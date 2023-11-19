@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +12,6 @@ namespace CppClassExporter.Exporter
         public ClassDecl decl;
 
         public string sourceFilePath;
-        public string cFuncFileName;
         public string dllFileName;
         public string? cExportDecorator;
         public string indentStr = "\t";
@@ -24,7 +23,6 @@ namespace CppClassExporter.Exporter
             this.decl = decl;
             if (string.IsNullOrEmpty(decl.fileName)) decl.fileName = $"{decl.name}.h";
             cppToCTypeMap[decl.name] = "void";
-            this.cFuncFileName = cFuncFileName;
             this.dllFileName = dllFileName;
             this.sourceFilePath = sourceFilePath;
             this.cExportDecorator = cExportDecorator;
@@ -36,11 +34,58 @@ namespace CppClassExporter.Exporter
 
         #region ExportAsC
 
-        public void WriteCFile(string path)
+        public void WriteCDeclFile(string path)
         {
-            var lines = new List<string>();
-            var prefixLine = 0;
-            var postfixLine = 0;
+            List<string> lines = new List<string>();
+            int prefixLine, postfixLine;
+            CollectGenerateLines(path, lines, out prefixLine, out postfixLine);
+
+            using (var sw = new StreamWriter(path))
+            {
+                for (int i = 0; i < prefixLine; i++)
+                {
+                    sw.WriteLine(lines[i]);
+                }
+                sw.WriteLine(TextSnippet.GeneratedPrefix);
+                sw.WriteLine($"#include \"{Path.GetRelativePath(Path.GetDirectoryName(path)!, sourceFilePath)}\"");
+                sw.WriteLine();
+                sw.WriteLine(ExportAsCDecl());
+                sw.WriteLine(TextSnippet.GeneratedPostfix);
+                for (int i = postfixLine + 1; i < lines.Count; i++)
+                {
+                    sw.WriteLine(lines[i]);
+                }
+            }
+        }
+
+        public void WriteCDefFile(string path, string declFilePath)
+        {
+            List<string> lines = new List<string>();
+            int prefixLine, postfixLine;
+            CollectGenerateLines(path, lines, out prefixLine, out postfixLine);
+
+            using (var sw = new StreamWriter(path))
+            {
+                for (int i = 0; i < prefixLine; i++)
+                {
+                    sw.WriteLine(lines[i]);
+                }
+                sw.WriteLine(TextSnippet.GeneratedPrefix);
+                sw.WriteLine($"#include \"{Path.GetRelativePath(Path.GetDirectoryName(path)!, declFilePath)}\"");
+                sw.WriteLine();
+                sw.WriteLine(ExportAsCDef());
+                sw.WriteLine(TextSnippet.GeneratedPostfix);
+                for (int i = postfixLine + 1; i < lines.Count; i++)
+                {
+                    sw.WriteLine(lines[i]);
+                }
+            }
+        }
+
+        private static void CollectGenerateLines(string path, List<string> lines, out int prefixLine, out int postfixLine)
+        {
+            prefixLine = 0;
+            postfixLine = 0;
             using (var sr = new StreamReader(path))
             {
                 string? line;
@@ -67,29 +112,12 @@ namespace CppClassExporter.Exporter
                 postfixLine = prefixLine;
                 prefixLine = t;
             }
-
-            using (var sw = new StreamWriter(path))
-            {
-                for (int i = 0; i < prefixLine; i++)
-                {
-                    sw.WriteLine(lines[i]);
-                }
-                sw.WriteLine(TextSnippet.GeneratedPrefix);
-                sw.WriteLine($"#include \"{Path.GetRelativePath(Path.GetDirectoryName(path)!, sourceFilePath)}\"");
-                sw.WriteLine();
-                sw.WriteLine(ExportAsC());
-                sw.WriteLine(TextSnippet.GeneratedPostfix);
-                for (int i = postfixLine + 1; i < lines.Count; i++)
-                {
-                    sw.WriteLine(lines[i]);
-                }
-            }
         }
 
         /// <summary>
-        /// 根据类声明输出 C 语言函数, 并标记 dll 导出
+        /// 根据类声明输出 C 语言函数声明, 并标记 dll 导出
         /// </summary>
-        public string ExportAsC()
+        public string ExportAsCDecl()
         {
             var strBuilder = new StringBuilder();
             // extern "C" {
@@ -110,6 +138,25 @@ namespace CppClassExporter.Exporter
             return strBuilder.ToString();
         }
 
+        /// <summary>
+        /// 根据类声明输出 C 语言函数定义
+        /// </summary>
+        public string ExportAsCDef()
+        {
+            var strBuilder = new StringBuilder();
+            C_GenCtorDef(strBuilder, decl.ctors, 0);
+            C_GenDtorDef(strBuilder, 0);
+            foreach (var func in decl.dynamicMethods)
+            {
+                C_GenFunctionDef(strBuilder, func, 0);
+            }
+            foreach (var func in decl.staticMethods)
+            {
+                C_GenFunctionDef(strBuilder, func, 0);
+            }
+            return strBuilder.ToString();
+        }
+        
         /// <summary>
         /// 将类型转换为可安全导出的类型. 转换规则基于 <see cref="cppToCTypeMap"/> 字典
         /// </summary>
@@ -138,10 +185,30 @@ namespace CppClassExporter.Exporter
             {
                 FunctionDecl ctor = ctors[i];
                 List<ParameterDecl> safeParams = ConvertCToCSharpTypes(ctor.parameters);
-                // void* name_ctor_i(int a, char b)
+                // void* $(cExportDecorator) name_ctor_i(int a, char b);
+                str.Indent(indent, indentStr)
+                .Append(cExportDecorator)
+                .Append("void* ")
+                .Append(string.Format(TextSnippet.C_CtorFuncNamePattern, decl.name, i));
+                using (new ParameterListScope(str))
+                {
+                    str.Append(string.Join(", ", safeParams));
+                }
+                str.AppendLine(";");
+
+                str.AppendLine();
+            }
+        }
+
+        private void C_GenCtorDef(StringBuilder str, IList<FunctionDecl> ctors, int indent)
+        {
+            for (int i = 0; i < ctors.Count; i++)
+            {
+                FunctionDecl ctor = ctors[i];
+                List<ParameterDecl> safeParams = ConvertCToCSharpTypes(ctor.parameters);
+                // 实现 不需要加 cExportDecorator
                 str.Indent(indent, indentStr)
                 .Append("void* ")
-                .Append(cExportDecorator)
                 .Append(string.Format(TextSnippet.C_CtorFuncNamePattern, decl.name, i));
                 using (new ParameterListScope(str))
                 {
@@ -163,15 +230,29 @@ namespace CppClassExporter.Exporter
                     str.Indent(indent + 1, indentStr).AppendLine($"return (void*)(new {decl.name}({args}));");
                 }
                 // }
+
+                str.AppendLine();
             }
         }
 
         private void C_GenDtor(StringBuilder str, int indent)
         {
-            // void className_dtor()
+            // 声明
+            // void $(cExportDecorator) className_dtor()
+            str.Indent(indent, indentStr)
+            .Append(cExportDecorator)
+            .Append("void ")
+            .Append(string.Format(TextSnippet.C_DtorFuncNamePattern, decl.name))
+            .AppendLine("(void* this_raw);");
+            
+            str.AppendLine();
+        }
+
+        private void C_GenDtorDef(StringBuilder str, int indent)
+        {
+            // 实现
             str.Indent(indent, indentStr)
             .Append("void ")
-            .Append(cExportDecorator)
             .Append(string.Format(TextSnippet.C_DtorFuncNamePattern, decl.name))
             .AppendLine("(void* this_raw)");
             using (new CodeBodyScope(str, indent, indentStr))
@@ -179,18 +260,14 @@ namespace CppClassExporter.Exporter
                 str.Indent(indent + 1, indentStr)
                 .AppendLine($"delete ({decl.name}*)this_raw;");
             }
+
+            str.AppendLine();
         }
 
         private void C_GenFunction(StringBuilder str, FunctionDecl func, int indent)
         {
             List<ParameterDecl> safeParams = ConvertCToCSharpTypes(func.parameters);
             Dictionary<string, TypeDecl> paramMap = func.parameters.ToDictionary(p => p.name, p => p.type);
-
-            // retType name_ctor_i(int a, char b)
-            str.Indent(indent, indentStr)
-            .Append(func.retType).Append(' ')
-            .Append(cExportDecorator)
-            .Append($"{decl.name}_{func.name}");
             if (func.isMemberFunction)
             {
                 // 成员函数需要加个 this 指针, 参数名为 "this_raw"
@@ -200,12 +277,46 @@ namespace CppClassExporter.Exporter
                     type = new TypeDecl { baseTypeName = "void", isPointer = true }
                 });
             }
+
+            //声明
+            // retType name_ctor_i(int a, char b)
+            str.Indent(indent, indentStr)
+            .Append(cExportDecorator)
+            .Append(func.retType).Append(' ')
+            .Append($"{decl.name}_{func.name}");
+            
+            using (new ParameterListScope(str))
+            {
+                str.Append(string.Join(", ", safeParams));
+            }
+            str.AppendLine(";");
+
+            str.AppendLine();
+        }
+
+        private void C_GenFunctionDef(StringBuilder str, FunctionDecl func, int indent)
+        {
+            List<ParameterDecl> safeParams = ConvertCToCSharpTypes(func.parameters);
+            Dictionary<string, TypeDecl> paramMap = func.parameters.ToDictionary(p => p.name, p => p.type);
+            if (func.isMemberFunction)
+            {
+                // 成员函数需要加个 this 指针, 参数名为 "this_raw"
+                safeParams.Insert(0, new ParameterDecl
+                {
+                    name = "this_raw",
+                    type = new TypeDecl { baseTypeName = "void", isPointer = true }
+                });
+            }
+
+            // 实现
+            str.Indent(indent, indentStr)
+            .Append(func.retType).Append(' ')
+            .Append($"{decl.name}_{func.name}");
             using (new ParameterListScope(str))
             {
                 str.Append(string.Join(", ", safeParams));
             }
             str.AppendLine();
-
             // {
             //
             // }
@@ -225,6 +336,8 @@ namespace CppClassExporter.Exporter
                 if (func.isMemberFunction) str.AppendLine($"(({decl.name}*)this_raw)->{func.name}({args});");
                 else str.AppendLine($"{decl.name}::{func.name}({args});");
             }
+
+            str.AppendLine();
         }
 
         #endregion

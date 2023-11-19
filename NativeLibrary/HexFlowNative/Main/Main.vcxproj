@@ -173,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="chunked_2d_container.cpp" />
+    <ClCompile Include="chunked_2d_container_export.cpp" />
     <ClCompile Include="hex_math.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="mesh_generator.cpp" />

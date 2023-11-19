@@ -24,6 +24,9 @@
     <ClCompile Include="hex_math_Test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="chunked_2d_container_test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

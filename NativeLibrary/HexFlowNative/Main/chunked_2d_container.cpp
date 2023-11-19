@@ -19,6 +19,8 @@ chunked_2d_container::~chunked_2d_container()
     }
 }
 
+inline bool chunked_2d_container::exist_chunk(vec2i_export chunk_pos) { return _map.contains(chunk_pos); }
+
 bool chunked_2d_container::exist_cell(vec2i_export cell_pos)
 {
     return exist_chunk(cell2chunk(cell_pos));

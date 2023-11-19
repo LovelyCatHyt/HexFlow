@@ -2,7 +2,9 @@
 	"actions": [
         {
             "sourceHeaderPath": "./chunked_2d_container.h",
-            "exportHeaderPath": "./chunked_2d_container_export.hpp"
+            "exportHeaderPath": "./chunked_2d_container_export.hpp",
+            "exportImplPath": "./chunked_2d_container_export.cpp"
+
         }
 	],
 	"strReplaceMap": [

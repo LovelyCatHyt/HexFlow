@@ -1,4 +1,4 @@
-﻿namespace CppClassExporter
+namespace CppClassExporter
 {
     namespace CppElements
     {
@@ -6,7 +6,7 @@
         {
             public string baseTypeName = "";
             public bool isPointer = false;
-            public bool IsVoid => baseTypeName == "void";
+            public bool IsVoid => baseTypeName == "void" && !isPointer;
 
             public TypeDecl() { }
 
