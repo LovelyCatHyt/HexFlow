@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unitilities.Serialization;
+using System.Collections.Generic;
 
 namespace HexFlow.NativeCore
 {
@@ -12,6 +13,18 @@ namespace HexFlow.NativeCore
         /// 从 <see cref="NativeArray{T}"/> 获取 <see cref="{T}"/>* 类型的指针
         /// </summary>
         public static unsafe T* Get<T>(this NativeArray<T> array) where T : unmanaged => (T*)array.GetUnsafePtr();
+
+        public static NativeArray<T> CreateArrayFromSourceOrNew<T>(T[] sourceArray, int minCount, Allocator allocator = Allocator.Temp) where T : unmanaged
+        {
+            if (sourceArray == null || sourceArray.Length < minCount)
+            {
+                return new NativeArray<T>(minCount, allocator);
+            }
+            else
+            {
+                return new NativeArray<T>(sourceArray, allocator);
+            }
+        }
 
         /// <summary>
         /// 类似于 C++ 中的 sizeof, 但其实只是 <see cref="Marshal.SizeOf{T}"/> 的封装
@@ -25,7 +38,7 @@ namespace HexFlow.NativeCore
         public static int SizeOfByte<T>(this NativeArray<T> array) where T : unmanaged
         {
             long temp = (long)array.Length * SizeOf<T>();
-            if(temp>int.MaxValue)
+            if (temp > int.MaxValue)
             {
                 // 这可能吗? 或许在创建 NativeArray 的时候已经报错了吧
                 throw new System.NotImplementedException($"Does not support NativeArray that holds more than int.MaxValue of bytes, but get {temp}.");

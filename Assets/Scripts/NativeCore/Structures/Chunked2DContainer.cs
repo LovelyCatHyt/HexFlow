@@ -197,7 +197,7 @@ namespace HexFlow.NativeCore.Structures
             ChunkSize = chunkSize;
             ElementCountPerChunk = ChunkSize * ChunkSize;
             _ptr = Ntv.Ctor_0(ChunkSize, UnsafeUtils.SizeOf<T>());
-            Generate(Vector2Int.zero);
+            // Generate(Vector2Int.zero);
         }
 
         #region IBinarySerializable
@@ -340,7 +340,7 @@ namespace HexFlow.NativeCore.Structures
             {
                 foreach(var kv in this)
                 {
-                    Remove(kv.Key);
+                    onBeforeChunkRemoved?.Invoke(kv.Key, kv.Value);
                 }
 
                 Ntv.Dtor(_ptr);

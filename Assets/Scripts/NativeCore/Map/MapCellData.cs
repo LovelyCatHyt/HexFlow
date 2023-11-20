@@ -35,9 +35,10 @@ namespace HexFlow.NativeCore.Map
         public static void ApplyDataToMesh(IntPtr data, int cellCount, Mesh target, HexMeshType type)
         {
             int vertNum = type.GetVertNum();
-
-            var colorBuffer = new NativeArray<Color>(target.colors, Allocator.Temp);
-            var uvBuffer = new NativeArray<Vector2>(target.uv, Allocator.Temp);
+            int totalVertNum = vertNum * cellCount;
+            
+            NativeArray<Color> colorBuffer = UnsafeUtils.CreateArrayFromSourceOrNew(target.colors, totalVertNum);
+            NativeArray<Vector2> uvBuffer = UnsafeUtils.CreateArrayFromSourceOrNew(target.uv, totalVertNum);
             unsafe
             {
                 ExtractRenderDataToMesh((MapCellData*)data, cellCount, colorBuffer.Get(), uvBuffer.Get(), vertNum);

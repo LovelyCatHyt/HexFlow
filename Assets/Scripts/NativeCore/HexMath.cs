@@ -72,7 +72,7 @@ namespace HexFlow.NativeCore
         /// axial 坐标对应的直角坐标
         /// </summary>
         [DllImport(DllName, EntryPoint = "axial2position")]
-        public static extern Vector3 Axial2Position(Vector2Int axial);
+        public static extern Vector2 Axial2Position(Vector2Int axial);
 
         /// <summary>
         /// 整数坐标对应的最近格点坐标
