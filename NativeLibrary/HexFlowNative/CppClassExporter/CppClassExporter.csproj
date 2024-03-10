@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <BaseOutputPath>$(SolutionDir)Tools\CppClassExporter\</BaseOutputPath>
+        <EnableDefaultItems>true</EnableDefaultItems>
+    </PropertyGroup>
+
+    <ProjectExtensions>
+        <VisualStudio>
+            <UserProperties />
+        </VisualStudio>
+    </ProjectExtensions>
+
+    <ItemGroup>
+      <Compile Remove="bin\**" />
+      <Compile Remove="Release\**" />
+      <EmbeddedResource Remove="bin\**" />
+      <EmbeddedResource Remove="Release\**" />
+      <None Remove="bin\**" />
+      <None Remove="Release\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="CPP14Lexer.g4" />
+        <None Remove="CPP14Parser.g4" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Antlr4 Include="CPP14Lexer.g4">
+        </Antlr4>
+        <Antlr4 Include="CPP14Parser.g4">
+        </Antlr4>
+    </ItemGroup>
+
+    <!--<ItemGroup>
+        <Compile Include=".\*.cs" />
+        <Compile Include=".\CppElements\**" />
+        <Compile Include=".\Exporter\**" />
+        <Compile Include=".\CppVisitors\**" />
+        <Content Include=".\TestDir\**" />
+    </ItemGroup>-->
+
+    <ItemGroup>
+        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+        <PackageReference Include="Antlr4BuildTasks" Version="12.3.0" />
+        <PackageReference Include="System.Memory" Version="4.5.5" />
+    </ItemGroup>
+
+
+</Project>

@@ -1,5 +1,6 @@
-# VS Solution is needed in this folder
+# VS Solution and CSharp Project is needed in this folder
 !*.sln
+!*.csproj
 
 # Prerequisites
 *.d
