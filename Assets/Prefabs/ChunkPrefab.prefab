@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 22d15cab3fdeeb84e8d8b7570a26fe58, type: 2}
+  - {fileID: 2100000, guid: 1e1bebdecbe354c4482028b322b40b27, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -105,7 +105,7 @@ MonoBehaviour:
       m_Calls: []
   _type: 0
   _radius: 1
-  _chunkSize: {x: 1, y: 1}
+  _chunkSize: {x: 2, y: 2}
   _origin: {x: 0, y: 0}
 --- !u!114 &3585264624876287146
 MonoBehaviour:
@@ -119,3 +119,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb104602c711f5f469e855915de19d6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  meshType: 0
+  textureType: 0

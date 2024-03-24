@@ -29,6 +29,16 @@ bool chunked_2d_container_exist_cell(void* this_raw, vec2i_export cell_pos)
 	return ((chunked_2d_container*)this_raw)->exist_cell(cell_pos);
 }
 
+vec2i_export chunked_2d_container_cell2chunk(void* this_raw, vec2i_export cell_pos)
+{
+	return ((chunked_2d_container*)this_raw)->cell2chunk(cell_pos);
+}
+
+vec2i_export chunked_2d_container_chunk2cell(void* this_raw, vec2i_export chunk_pos)
+{
+	return ((chunked_2d_container*)this_raw)->chunk2cell(chunk_pos);
+}
+
 void* chunked_2d_container_get_chunk_data(void* this_raw, vec2i_export chunk_pos)
 {
 	return ((chunked_2d_container*)this_raw)->get_chunk_data(chunk_pos);

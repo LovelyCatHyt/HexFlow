@@ -17,6 +17,10 @@ extern "C"{
 
 	API_DEF bool chunked_2d_container_exist_cell(void* this_raw, vec2i_export cell_pos);
 
+	API_DEF vec2i_export chunked_2d_container_cell2chunk(void* this_raw, vec2i_export cell_pos);
+
+	API_DEF vec2i_export chunked_2d_container_chunk2cell(void* this_raw, vec2i_export chunk_pos);
+
 	API_DEF void* chunked_2d_container_get_chunk_data(void* this_raw, vec2i_export chunk_pos);
 
 	API_DEF void* chunked_2d_container_create_chunk(void* this_raw, vec2i_export chunk_pos);

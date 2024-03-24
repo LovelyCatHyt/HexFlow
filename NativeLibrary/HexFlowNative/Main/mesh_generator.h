@@ -56,3 +56,10 @@ extern "C"
     /// <returns></returns>
     void API_DEF set_vert_color_gridmap(color* colors, color* gridColors, int vert_per_cell, int length);
 }
+
+constexpr const float to_rad = 3.1415926536f / 180.0f;
+constexpr const float to_deg = 180.0f / 3.1415926536f;
+
+vector3f get_vec3_from_angle(float angle, float len);
+
+vector2f get_vec2_from_angle(float angle);

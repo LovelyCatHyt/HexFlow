@@ -11,8 +11,6 @@ private:
 
     std::unordered_map<vector2i, void*> _map;
 
-    vector2i cell2chunk(vector2i chunk_pos);
-
 public:
 
     int chunk_size;
@@ -33,6 +31,10 @@ public:
     bool exist_chunk(vec2i_export chunk_pos);
 
     bool exist_cell(vec2i_export cell_pos);
+
+    vec2i_export cell2chunk(vec2i_export cell_pos);
+
+    vec2i_export chunk2cell(vec2i_export chunk_pos);
 
     void* get_chunk_data(vec2i_export chunk_pos);
 

@@ -5,25 +5,30 @@ using HexFlow.NativeCore.Structures;
 using HexFlow.ProceduralMesh;
 
 using MapCellData = HexFlow.NativeCore.Map.MapCellData;
+using HexFlow.NativeCore;
 
 namespace HexFlow.Map
 {
     [RequireComponent(typeof(HexChunkMesh))]
     public class ChunkRenderer : MonoBehaviour
     {
-        private HexChunkMesh _chunk;
+        public HexMeshType meshType;
+        public HexTextureType textureType;
+
+        public HexChunkMesh Generator => _generator;
+        private HexChunkMesh _generator;
         private INative2DArray<MapCellData> _data;
 
         private void Awake()
         {
-            _chunk = GetComponent<HexChunkMesh>();
+            _generator = GetComponent<HexChunkMesh>();
         }
 
         public void Init(Vector3 positionInWorld, float radius, INative2DArray<MapCellData> chunkData)
         {
-            _chunk.ChunkSize = chunkData.Size;
-            _chunk.Type = NativeCore.HexMeshType.UniformTriangle;
-            _chunk.Radius = radius;
+            _generator.ChunkSize = chunkData.Size;
+            _generator.Type = meshType;
+            _generator.Radius = radius;
             transform.position = positionInWorld;
             _data = chunkData;
             UpdateMesh();
@@ -35,7 +40,7 @@ namespace HexFlow.Map
         /// </summary>
         public void ResetRadius(Vector3 positionInWorld, float radius)
         {
-            _chunk.Radius = radius;
+            _generator.Radius = radius;
             transform.position = positionInWorld;
             UpdateMesh();
         }
@@ -43,9 +48,9 @@ namespace HexFlow.Map
         /// <summary>
         /// 刷新网格
         /// </summary>
-        public void UpdateMesh()
+        protected void UpdateMesh()
         {
-            MapCellData.ApplyDataToMesh(_data, _chunk.GeneratedMesh, _chunk.Type);
+            MapCellData.ApplyDataToMesh(_data, _generator.GeneratedMesh, _generator.Type);
         }
     }
 }

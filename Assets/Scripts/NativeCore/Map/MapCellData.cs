@@ -14,6 +14,12 @@ namespace HexFlow.NativeCore.Map
         public Color color;
         public bool enabled;
 
+        public MapCellData(Color color, bool enabled)
+        {
+            this.color = color;
+            this.enabled = enabled;
+        }
+
         [DllImport(DllName, EntryPoint = "extract_render_data_to_mesh")]
         public static extern unsafe void ExtractRenderDataToMesh(MapCellData* data, int dataLengh, Color* vertColor, Vector2* uv, int cellVertNum);
 

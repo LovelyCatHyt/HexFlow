@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="hex_map">
+      <UniqueIdentifier>{149b203e-1efc-449c-8a5f-0ee4ac2137ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -39,6 +42,9 @@
     <ClInclude Include="math.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="uv_generator.h">
+      <Filter>hex_map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -58,6 +64,9 @@
     </ClCompile>
     <ClCompile Include="chunked_2d_container_export.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="uv_generator.cpp">
+      <Filter>hex_map</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

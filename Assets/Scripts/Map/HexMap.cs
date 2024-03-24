@@ -15,6 +15,7 @@ namespace HexFlow.Map
 
         public Chunked2DContainer<MapCellData> Map { get; protected set; }
         public Dictionary<Vector2Int, ChunkRenderer> Renderers { get; protected set; }
+        
         #region UnityMessage
         public float Radius
         {
@@ -41,6 +42,7 @@ namespace HexFlow.Map
             Map = new Chunked2DContainer<MapCellData>(default, (int)(Time.time * 1000), ChunkSize);
             Map.onBeforeChunkRemoved += OnChunkRemoved;
             Map.onChunkCreated += OnChunkCreated;
+            Map.chunkGenerator = new CopyDefaultGenerator<MapCellData>(Map.defaultValue);
 
             Renderers = new Dictionary<Vector2Int, ChunkRenderer>();
         }
@@ -52,7 +54,9 @@ namespace HexFlow.Map
 
         #endregion
 
-        public bool GenerateAt(Vector3 positionInWorld, out Vector2Int chunkPos)
+
+        #region PublicMethod
+        public bool GenearteIfNotExist(Vector3 positionInWorld, out Vector2Int chunkPos)
         {
             chunkPos = GetChunkPos(positionInWorld);
             if (Map.ExistChunk(chunkPos)) return false;
@@ -60,13 +64,31 @@ namespace HexFlow.Map
             Map.Generate(chunkPos);
             return true;
         }
+        public bool GenerateIfNotExist(Vector2Int chunkPos)
+        {
+            if (Map.ExistChunk(chunkPos)) return false;
 
-        public Vector2Int GetChunkPos(Vector3 positionInWorld)
+            Map.Generate(chunkPos);
+            return true;
+        }
+
+        public Vector2Int GetCellPos(Vector3 positionInWorld)
         {
             var pos = transform.InverseTransformPoint(positionInWorld);
             var pos2D = new Vector2(pos.x, pos.z);
             var axial = HexMath.Position2Axial(pos2D, Radius);
-            return Map.ToChunkPos(axial.ToOffset());
+            return axial.ToOffset();
+        }
+
+        public Vector2Int GetChunkPos(Vector3 positionInWorld)
+        {
+            return Map.ToChunkPos(GetCellPos(positionInWorld));
+        }
+
+        public void GetChunkAndCellPos(Vector3 positionInWorld, out Vector2Int chunkPos, out Vector2Int cellPos)
+        {
+            cellPos = GetCellPos(positionInWorld);
+            chunkPos = Map.ToChunkPos(cellPos);
         }
 
         public Vector3 GetChunkOrigin(Vector2Int chunkPos)
@@ -75,6 +97,72 @@ namespace HexFlow.Map
             var pos2D = HexMath.Axial2Position(axial) * Radius;
             return transform.TransformPoint(new Vector3(pos2D.x, 0, pos2D.y));
         }
+
+        public MapCellData GetData(Vector2Int cellPos)
+        {
+            var chunkPos = Map.ToChunkPos(cellPos);
+            if (!Map.ExistChunk(chunkPos)) return Map.defaultValue;
+
+            var chunkArray = Map.GetChunkAsArray(chunkPos);
+            cellPos = TransformMapToChunk(chunkPos, cellPos);
+            return chunkArray[cellPos];
+        }
+        public MapCellData GetData(Vector3 positionInWorld) 
+        {
+            GetChunkAndCellPos(positionInWorld, out var chunkPos, out var cellPos);
+            if (!Map.ExistChunk(chunkPos)) return Map.defaultValue;
+
+            var chunkArray = Map.GetChunkAsArray(chunkPos);
+            cellPos = TransformMapToChunk(chunkPos, cellPos);
+            return chunkArray[cellPos];
+        }
+
+        /// <summary>
+        /// 向世界坐标下的格点设置数据, 若该坐标无区块则生成后再设置
+        /// </summary>
+        /// <param name="positionInWorld"></param>
+        /// <param name="data"></param>
+        public void SetData(Vector3 positionInWorld, MapCellData data)
+        {
+            GenearteIfNotExist(positionInWorld, out var chunkPos);
+            var cellPos = GetCellPos(positionInWorld);
+            var chunkArr = Map.GetChunkAsArray(chunkPos);
+            cellPos = TransformMapToChunk(chunkPos, cellPos);
+            chunkArr[cellPos] = data;
+            UpdateChunkUV(chunkPos);
+        }
+        public void SetData(Vector2Int cellPos, MapCellData data)
+        {
+            var chunkPos = Map.ToChunkPos(cellPos);
+            var chunkArr = Map.GetChunkAsArray(chunkPos);
+            cellPos = TransformMapToChunk(cellPos, cellPos);
+            chunkArr[cellPos] = data;
+            UpdateChunkUV(chunkPos);
+        }
+
+        public Vector2Int TransformMapToChunk(Vector2Int chunkPos, Vector2Int cellPos)
+        {
+            var origin = Map.ChunkSize * chunkPos;
+            return cellPos - origin;
+        }
+
+        public bool RaycastToCell(Ray ray, out Vector2Int cellPos, out Vector3 hitPos)
+        {
+            var virtualPlane = new Plane(transform.up, transform.position.magnitude);
+            if (virtualPlane.Raycast(ray, out var enter))
+            {
+                hitPos = ray.GetPoint(enter);
+                cellPos = GetCellPos(hitPos);
+                return true;
+            }
+            cellPos = new Vector2Int();
+            hitPos = ray.GetPoint(0);
+            return false;
+        }
+
+        #endregion
+
+
         protected void OnChunkCreated(Vector2Int chunkPos, IntPtr chunkData)
         {
             CreateChunkGO(chunkPos, new ChunkDataProxy<MapCellData>(chunkData, Map.ChunkSize));
@@ -95,12 +183,21 @@ namespace HexFlow.Map
             var r = go.GetComponent<ChunkRenderer>();
             Renderers[chunkPos] = r;
             r.Init(worldPos, Radius, chunkData);
+            UpdateChunkUV(chunkPos);
         }
 
         protected void RemoveChunkGO(Vector2Int chunkPos)
         {
             // 实际情况应该不存在大量反复生成销毁的情形, 因此直接 Instantiate 和 Destroy 就完事了.
             Destroy(Renderers[chunkPos].gameObject);
+        }
+
+        protected void UpdateChunkUV(Vector2Int chunkPos)
+        {
+            var r = Renderers[chunkPos];
+            if (!r) return;
+
+            UVGenerator.GenerateUVForMap(r.Generator.GeneratedMesh, Map, chunkPos, r.meshType, r.textureType);
         }
     }
 }

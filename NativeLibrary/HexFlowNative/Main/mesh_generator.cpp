@@ -2,14 +2,6 @@
 #include <cmath>
 #include "mesh_generator.h"
 
-float to_rad = 3.1415926536f / 180.0f;
-float to_deg = 180.0f / 3.1415926536f;
-
-vector3f get_vec3_from_angle(float angle, float len)
-{
-    return vector3f(cos(angle * to_rad) * len, sin(angle * to_rad) * len, 0);
-}
-
 int calc_num_of_rect_layout_a(int width, int height)
 {
     // 由六个三角形组成的六边形
@@ -171,4 +163,14 @@ void set_vert_color32_gridmap(color32* colors, color32* gridColors, int vert_per
 void set_vert_color_gridmap(color* colors, color* gridColors, int vert_per_cell, int length)
 {
     repeat_copy(colors, gridColors, vert_per_cell, length);
+}
+
+vector3f get_vec3_from_angle(float angle, float len)
+{
+    return vector3f(cos(angle * to_rad) * len, sin(angle * to_rad) * len, 0);
+}
+
+vector2f get_vec2_from_angle(float angle)
+{
+    return vector2f(cos(angle * to_rad), sin(angle * to_rad));
 }

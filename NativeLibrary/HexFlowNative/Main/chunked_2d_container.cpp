@@ -6,9 +6,16 @@
 
 using iterator = std::unordered_map<vector2i, void*>::iterator;
 
-vector2i chunked_2d_container::cell2chunk(vector2i chunk_pos)
+vec2i_export chunked_2d_container::cell2chunk(vec2i_export cell_pos)
 {
-    return vector2i(floor_div(chunk_pos.x, chunk_size), floor_div(chunk_pos.y, chunk_size));
+    vector2i _cell_pos = cell_pos;
+    return vector2i(floor_div(_cell_pos.x, chunk_size), floor_div(_cell_pos.y, chunk_size));
+}
+
+vec2i_export chunked_2d_container::chunk2cell(vec2i_export chunk_pos)
+{
+    vector2i _chunk_pos = chunk_pos;
+    return vector2i(_chunk_pos.x * chunk_size, _chunk_pos.y * chunk_size);
 }
 
 chunked_2d_container::~chunked_2d_container()
@@ -58,7 +65,7 @@ bool chunked_2d_container::remove_chunk(vec2i_export chunk_pos)
 void* chunked_2d_container::get_cell_data(vec2i_export cell_pos)
 {
     auto pos = vector2i(cell_pos);
-    auto chunk_pos = cell2chunk(cell_pos);
+    vector2i chunk_pos = cell2chunk(cell_pos);
     if (!exist_chunk(chunk_pos)) return nullptr;
     auto chunk_head = _map[chunk_pos];
     // 当前区块的基坐标, 即最小坐标
@@ -72,7 +79,7 @@ void* chunked_2d_container::get_cell_data(vec2i_export cell_pos)
 void chunked_2d_container::set_cell_data(vec2i_export cell_pos, void* cell_data)
 {
     auto pos = vector2i(cell_pos);
-    auto chunk_pos = cell2chunk(cell_pos);
+    vector2i chunk_pos = cell2chunk(cell_pos);
     if (!exist_chunk(chunk_pos)) create_chunk(chunk_pos);
     auto chunk_head = _map[chunk_pos];
     // 当前区块的基坐标, 即最小坐标

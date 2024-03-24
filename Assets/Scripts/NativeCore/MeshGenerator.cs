@@ -13,13 +13,28 @@ namespace HexFlow.NativeCore
         /// <summary>
         /// 均匀的三角形: 组成的网格整体上由全等的等边三角形均匀分布
         /// <para>每格18顶点</para>
+        /// <para>缩写: 4T, 4Tri, UT, 1B3S</para>
         /// </summary>
         UniformTriangle,
         /// <summary>
         /// 对称的最少三角形布局: 每个六边形仅由必须的4个三角形组成, 使用对称的1大3小布局
         /// <para>每格12顶点</para>
+        /// <para>缩写: 6T, 6Tri, ST</para>
         /// </summary>
         SymmetricalLeastTriangle
+    }
+
+    public enum HexTextureType
+    {
+        /// <summary>
+        /// 简单重复的六边形网格, 可用于大片地形
+        /// </summary>
+        SimpleRepeat,
+        /// <summary>
+        /// 连接型网格, 仅 <see cref="HexMeshType.UniformTriangle"/> 可使用. 
+        /// <para>用于需要在网格之间有连续纹理, 又能区分边缘的复杂岛屿, 如道路、传送带、大型结构等</para>
+        /// </summary>
+        Connective,
     }
 
     public static class MeshGenerator

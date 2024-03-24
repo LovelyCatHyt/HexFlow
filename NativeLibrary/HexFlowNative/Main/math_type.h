@@ -31,13 +31,13 @@ public:
     /// <summary>
     /// 全零默认构造函数
     /// </summary>
-    vector2_template() { x = 0; y = 0; }
+    constexpr vector2_template() { x = 0; y = 0; }
 
 
     /// <summary>
     /// 构造函数, 避免括号构造表达式产生意外的行为
     /// </summary>
-    vector2_template(T x, T y) noexcept
+    constexpr vector2_template(T x, T y) noexcept
     {
         this->x = x;
         this->y = y;
@@ -67,6 +67,18 @@ public:
     vector2_template<T> operator-(const vector2_template<T>& r)
     {
         return vector2_template<T>(x - r.x, y - r.y);
+    }
+
+    template<typename T>
+    vector2_template<T> operator*(T s)
+    {
+        return vector2_template<T>(x * s, y * s);
+    }
+
+    template<typename T>
+    vector2_template<T> operator/(T s)
+    {
+        return vector2_template<T>(x / s, y / s);
     }
 
     template<typename T>
@@ -121,12 +133,12 @@ public:
     /// <summary>
     /// 全零默认构造函数
     /// </summary>
-    vector3_template() { x = 0; y = 0; z = 0; }
+    constexpr vector3_template() { x = 0; y = 0; z = 0; }
 
     /// <summary>
     /// 构造函数, 避免括号构造表达式产生意外的行为
     /// </summary>
-    vector3_template(T x, T y, T z) noexcept
+    constexpr vector3_template(T x, T y, T z) noexcept
     {
         this->x = x;
         this->y = y;
@@ -159,6 +171,18 @@ public:
     vector3_template<T> operator-(const vector3_template<T>& r)
     {
         return vector3_template<T>(x - r.x, y - r.y, z - r.z);
+    }
+
+    template<typename T>
+    vector3_template<T> operator*(T s)
+    {
+        return vector3_template<T>(x * s, y * s, z * s);
+    }
+
+    template<typename T>
+    vector3_template<T> operator/(T s)
+    {
+        return vector3_template<T>(x / s, y / s, z / s);
     }
 
     template<typename T>

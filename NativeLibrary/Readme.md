@@ -1,4 +1,7 @@
 # HexFlowNative
+## 构建须知
+第一次构建, 只需要联网状态下用 VS 打开直接 build 即可, VS 会处理需要的 nuget 包和代码生成.
+当修改了需要代码生成的类时, 需要指定VS重新生成 [代码生成配置文件](/HexFlowNative/Main/cpp-export-task.json), 才能刷新生成的代码. ~~有空研究一下怎么配置得更智能一点~~
 ## Math
 ### [math_type.h](/HexFlowNative/Main/math_type.h)
 基础数据类型和数学运算函数. 兼容 Unity 中的 Vector 系列类型. 目前仅包含二维和三维的定义.
