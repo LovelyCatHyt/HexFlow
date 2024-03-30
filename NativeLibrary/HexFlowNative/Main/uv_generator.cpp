@@ -22,6 +22,39 @@ bool is_valid_hex_map(chunked_2d_container* container)
     return container && container->element_size == sizeof(map_cell_data);
 }
 
+// 构建滑动窗口完整数据
+void make_window(map_cell_data neighbors[6], map_cell_data& center, const vector2i& cell_pos, /*NotNull*/ chunked_2d_container* container)
+{
+    center = get_cell_data_s<map_cell_data>(container, cell_pos);
+    vector2i center_axial = offset2axial(cell_pos);
+    for (int i = 0; i < 6; i++)
+    {
+        auto axial = center_axial + AxialDirs[i];
+        neighbors[i] = get_cell_data_s<map_cell_data>(container, axial2offset(axial));
+    }
+}
+
+// 滑动窗口, 向右移一格, 只需要读取3次数据
+void move_window_add_col(map_cell_data neighbors[6], map_cell_data& center, const vector2i& next_cell_pos, /*NotNull*/ chunked_2d_container* container)
+{
+    neighbors[2]    = neighbors[1];
+    neighbors[3]    = center;
+    neighbors[4]    = neighbors[5];
+    center          = neighbors[0];
+
+    vector2i next_axial = offset2axial(next_cell_pos);
+    vector2i target_axial;
+
+    target_axial = next_axial + AxialDirs[0];
+    neighbors[0]    = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial));
+
+    target_axial = next_axial + AxialDirs[1];
+    neighbors[1] = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial));
+
+    target_axial = next_axial + AxialDirs[5];
+    neighbors[5] = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial));
+}
+
 void API_DEF hex_mesh_gen_simple_uv_4t(vector2f* uv_of_chunk, vector2i chunk_pos, chunked_2d_container* container)
 {
     if(!uv_of_chunk) return;
@@ -107,30 +140,28 @@ void API_DEF hex_mesh_gen_connective_uv_6t(vector2f* uv_of_chunk, vector2i chunk
     vector2i cell_start = container->chunk2cell(chunk_pos);
     for (int row = 0; row < chunk_size; row++)
     {
+        map_cell_data neighbors[6];
+        map_cell_data center_data;
+        make_window(neighbors, center_data, cell_start + vector2i(0, row), container);
+        
         for (int col = 0; col < chunk_size; col++)
         {
             for (int i = 0; i < 6; i++)
             {
                 int sub_area_id = 0;
-                vector2i center = offset2axial(cell_start + vector2i(col, row));
                 bool has_cell;
-                vector2i target_axial;
 
                 // 分析四个位置是否存在 enabled 的格子
-                target_axial = center;
-                has_cell = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial)).enabled;
+                has_cell = center_data.enabled;
                 sub_area_id |= (int)has_cell;
 
-                target_axial = center + AxialDirs[(i + 1) % 6];
-                has_cell = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial)).enabled;
+                has_cell = neighbors[(i + 1) % 6].enabled;
                 sub_area_id |= (int)has_cell << 1;
 
-                target_axial = center + AxialDirs[(i + 0) % 6];
-                has_cell = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial)).enabled;
+                has_cell = neighbors[(i + 0) % 6].enabled;
                 sub_area_id |= (int)has_cell << 2;
 
-                target_axial = center + AxialDirs[(i + 5) % 6];
-                has_cell = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial)).enabled;
+                has_cell = neighbors[(i + 5) % 6].enabled;
                 sub_area_id |= (int)has_cell << 3;
 
                 const vector2f uv0 = vector2f(1 - half_s3, 0.5f) * 0.25f;
@@ -147,6 +178,7 @@ void API_DEF hex_mesh_gen_connective_uv_6t(vector2f* uv_of_chunk, vector2i chunk
                 uv_of_chunk[start_id + 2] = uv2 + uv_offset;
             }
 
+            move_window_add_col(neighbors, center_data, cell_start + vector2i(col + 1, row), container);
         }
     }
 }

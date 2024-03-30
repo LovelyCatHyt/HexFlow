@@ -189,7 +189,6 @@ copy $(SolutionDir)$(Platform)\$(Configuration)\Main.pdb $(SolutionDir)..\..\Ass
     <ClCompile Include="chunked_2d_container_export.cpp" />
     <ClCompile Include="hex_math.cpp" />
     <ClCompile Include="map.cpp" />
-    <ClCompile Include="math_type.cpp" />
     <ClCompile Include="mesh_generator.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -15,7 +15,9 @@ namespace HexFlow.Map
 
         public Chunked2DContainer<MapCellData> Map { get; protected set; }
         public Dictionary<Vector2Int, ChunkRenderer> Renderers { get; protected set; }
-        
+
+        protected HashSet<Vector2Int> pendingUpdateUVChunks = new HashSet<Vector2Int>();
+
         #region UnityMessage
         public float Radius
         {
@@ -45,6 +47,15 @@ namespace HexFlow.Map
             Map.chunkGenerator = new CopyDefaultGenerator<MapCellData>(Map.defaultValue);
 
             Renderers = new Dictionary<Vector2Int, ChunkRenderer>();
+        }
+
+        private void LateUpdate()
+        {
+            foreach(var chunkPos in pendingUpdateUVChunks)
+            {
+                UpdateChunkUV(chunkPos);
+            }
+            pendingUpdateUVChunks.Clear();
         }
 
         private void OnDestroy()
@@ -120,24 +131,36 @@ namespace HexFlow.Map
         /// <summary>
         /// 向世界坐标下的格点设置数据, 若该坐标无区块则生成后再设置
         /// </summary>
-        /// <param name="positionInWorld"></param>
-        /// <param name="data"></param>
-        public void SetData(Vector3 positionInWorld, MapCellData data)
+        public void SetData(Vector3 positionInWorld, MapCellData data, bool updateNeighborChunk = true)
         {
             GenearteIfNotExist(positionInWorld, out var chunkPos);
             var cellPos = GetCellPos(positionInWorld);
             var chunkArr = Map.GetChunkAsArray(chunkPos);
             cellPos = TransformMapToChunk(chunkPos, cellPos);
             chunkArr[cellPos] = data;
-            UpdateChunkUV(chunkPos);
+            pendingUpdateUVChunks.Add(chunkPos);
+            if(updateNeighborChunk)
+            {
+                if (cellPos.x == 0) pendingUpdateUVChunks.Add(chunkPos - new Vector2Int(1, 0));
+                if (cellPos.y == 0) pendingUpdateUVChunks.Add(chunkPos - new Vector2Int(0, 1));
+                if (cellPos.x == Map.ChunkSize - 1) pendingUpdateUVChunks.Add(chunkPos + new Vector2Int(1, 0));
+                if (cellPos.y == Map.ChunkSize - 1) pendingUpdateUVChunks.Add(chunkPos + new Vector2Int(0, 1));
+            }
         }
-        public void SetData(Vector2Int cellPos, MapCellData data)
+        public void SetData(Vector2Int cellPos, MapCellData data, bool updateNeighborChunk = true)
         {
             var chunkPos = Map.ToChunkPos(cellPos);
             var chunkArr = Map.GetChunkAsArray(chunkPos);
             cellPos = TransformMapToChunk(cellPos, cellPos);
             chunkArr[cellPos] = data;
-            UpdateChunkUV(chunkPos);
+            pendingUpdateUVChunks.Add(chunkPos);
+            if (updateNeighborChunk)
+            {
+                if (cellPos.x == 0) pendingUpdateUVChunks.Add(chunkPos - new Vector2Int(1, 0));
+                if (cellPos.y == 0) pendingUpdateUVChunks.Add(chunkPos - new Vector2Int(0, 1));
+                if (cellPos.x == Map.ChunkSize - 1) pendingUpdateUVChunks.Add(chunkPos + new Vector2Int(1, 0));
+                if (cellPos.y == Map.ChunkSize - 1) pendingUpdateUVChunks.Add(chunkPos + new Vector2Int(0, 1));
+            }
         }
 
         public Vector2Int TransformMapToChunk(Vector2Int chunkPos, Vector2Int cellPos)
@@ -194,10 +217,10 @@ namespace HexFlow.Map
 
         protected void UpdateChunkUV(Vector2Int chunkPos)
         {
-            var r = Renderers[chunkPos];
-            if (!r) return;
-
-            UVGenerator.GenerateUVForMap(r.Generator.GeneratedMesh, Map, chunkPos, r.meshType, r.textureType);
+            if (Renderers.TryGetValue(chunkPos, out var r))
+            {
+                UVGenerator.GenerateUVForMap(r.Generator.GeneratedMesh, Map, chunkPos, r.meshType, r.textureType);
+            }
         }
     }
 }
