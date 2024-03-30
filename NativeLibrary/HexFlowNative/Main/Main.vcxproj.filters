@@ -68,6 +68,9 @@
     <ClCompile Include="uv_generator.cpp">
       <Filter>hex_map</Filter>
     </ClCompile>
+    <ClCompile Include="math_type.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

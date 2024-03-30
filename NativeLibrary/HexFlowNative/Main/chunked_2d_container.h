@@ -63,3 +63,10 @@ public:
 #pragma endregion
 };
 
+template<typename T>
+T get_cell_data_s(chunked_2d_container* container, vector2i cell_pos)
+{
+    T* ptr = static_cast<T*>(container->get_cell_data(cell_pos));
+    if(ptr) return *ptr;
+    return T();
+}

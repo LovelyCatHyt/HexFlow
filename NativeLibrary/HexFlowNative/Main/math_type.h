@@ -15,7 +15,7 @@ DEF_EXPORT_VECTOR(vec3f_export, float, 3);
 //#define BIT_CAST_UNCHECKED(T_TO, INPUT) *reinterpret_cast<T_TO*>(&(INPUT))
 
 template<typename T>
-class vector2_template
+struct vector2_template
 {
 public:
     union
@@ -58,25 +58,25 @@ public:
     }
 
     template<typename T>
-    vector2_template<T> operator+(const vector2_template<T>& r)
+    vector2_template<T> operator+(const vector2_template<T>& r) const
     {
         return vector2_template<T>(x + r.x, y + r.y);
     }
 
     template<typename T>
-    vector2_template<T> operator-(const vector2_template<T>& r)
+    vector2_template<T> operator-(const vector2_template<T>& r) const
     {
         return vector2_template<T>(x - r.x, y - r.y);
     }
 
     template<typename T>
-    vector2_template<T> operator*(T s)
+    vector2_template<T> operator*(T s) const
     {
         return vector2_template<T>(x * s, y * s);
     }
 
     template<typename T>
-    vector2_template<T> operator/(T s)
+    vector2_template<T> operator/(T s) const
     {
         return vector2_template<T>(x / s, y / s);
     }
@@ -107,7 +107,7 @@ public:
 };
 
 template<typename T>
-class vector3_template
+struct vector3_template
 {
 public:
 
@@ -162,25 +162,25 @@ public:
     }
 
     template<typename T>
-    vector3_template<T> operator+(const vector3_template<T>& r)
+    vector3_template<T> operator+(const vector3_template<T>& r) const
     {
         return vector3_template<T>(x + r.x, y + r.y, z + r.z);
     }
 
     template<typename T>
-    vector3_template<T> operator-(const vector3_template<T>& r)
+    vector3_template<T> operator-(const vector3_template<T>& r) const
     {
         return vector3_template<T>(x - r.x, y - r.y, z - r.z);
     }
 
     template<typename T>
-    vector3_template<T> operator*(T s)
+    vector3_template<T> operator*(T s) const
     {
         return vector3_template<T>(x * s, y * s, z * s);
     }
 
     template<typename T>
-    vector3_template<T> operator/(T s)
+    vector3_template<T> operator/(T s) const
     {
         return vector3_template<T>(x / s, y / s, z / s);
     }

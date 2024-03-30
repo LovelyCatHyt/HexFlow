@@ -20,6 +20,9 @@ namespace HexFlow.NativeCore
         [DllImport(DllName, EntryPoint = "hex_mesh_gen_simple_uv_6t")]
         public static extern unsafe void GenSimpleUV_6T(Vector2* uv, Vector2Int chunkPos, IntPtr chunkContainer);
 
+        [DllImport(DllName, EntryPoint = "hex_mesh_gen_connective_uv_6t")]
+        public static extern unsafe void GenConnectiveUV_6T(Vector2* uv, Vector2Int chunkPos, IntPtr chunkContainer);
+
         public static void GenerateUVForMap([NotNull] Mesh mesh, [NotNull] Chunked2DContainer<MapCellData> map, Vector2Int chunkPos, HexMeshType meshType, HexTextureType texType)
         {
             Profiler.BeginSample("GenerateUVForMap");
@@ -38,6 +41,10 @@ namespace HexFlow.NativeCore
                             }
                             break;
                         case HexTextureType.Connective:
+                            unsafe
+                            {
+                                GenConnectiveUV_6T(uvs.Get(), chunkPos, map.NativePtr);
+                            }
                             break;
                         default:
                             unsafe

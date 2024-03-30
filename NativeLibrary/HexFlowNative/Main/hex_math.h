@@ -22,4 +22,20 @@ extern "C" {
 
     vec3i_export API_DEF cube_round(vector3f cube_frac);
 
+    vec2i_export API_DEF axial_rot_left_1(vector2i axial);
+    vec2i_export API_DEF axial_rot_left_2(vector2i axial);
+    vec2i_export API_DEF axial_rot_right_1(vector2i axial);
+    vec2i_export API_DEF axial_rot_right_2(vector2i axial);
+
 }
+
+// 从右边开始, 逆时针方向的六个 Axial 向量
+const vector2i AxialDirs[] = 
+{
+    vector2i(1, 0),
+    vector2i(0, 1),
+    vector2i(-1, 1),
+    vector2i(-1, 0),
+    vector2i(0, -1),
+    vector2i(1, -1),
+};

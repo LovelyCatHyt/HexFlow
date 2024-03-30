@@ -67,3 +67,27 @@ vec3i_export API_DEF cube_round(vector3f cube_frac)
 
     return vector3i(q, r, s);
 }
+
+vec2i_export axial_rot_left_1(vector2i axial)
+{
+    auto s = -axial.x - axial.y;
+    return vec2i_export({ -axial.y, -s });
+}
+
+vec2i_export axial_rot_left_2(vector2i axial)
+{
+    auto s = -axial.x - axial.y;
+    return vec2i_export({ s, axial.x });
+}
+
+vec2i_export axial_rot_right_1(vector2i axial)
+{
+    auto s = -axial.x - axial.y;
+    return vec2i_export({ -s, -axial.x });
+}
+
+vec2i_export axial_rot_right_2(vector2i axial)
+{
+    auto s = -axial.x - axial.y;
+    return vec2i_export({ axial.y, s });
+}

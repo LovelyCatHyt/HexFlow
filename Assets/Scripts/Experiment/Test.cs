@@ -38,5 +38,12 @@ public class Test : MonoBehaviour
             data.enabled = false;
             map.SetData(hitPos, data);
         }
+
+        if(Input.GetMouseButtonUp(2))
+        {
+            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            map.RaycastToCell(ray, out var cellPos, out var hitPos);
+            Debug.Log($"mouseup at cellPos: {cellPos}");
+        }
     }
 }

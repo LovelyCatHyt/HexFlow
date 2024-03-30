@@ -34,9 +34,9 @@ void API_DEF hex_mesh_gen_simple_uv_4t(vector2f* uv_of_chunk, vector2i chunk_pos
     {
         for (int col = 0; col < chunk_size; col++)
         {
-            auto* data = static_cast<map_cell_data*>(container->get_cell_data(vector2i(cell_start.x + col, cell_start.y + row)));
+            auto data =  get_cell_data_s<map_cell_data>(container, vector2i(col, row) + cell_start);
             int start_id = (row * chunk_size + col) * vert_count;
-            if (data->enabled)
+            if (data.enabled)
             {
                 // 中间大三角
                 uv_of_chunk[start_id + 0] = uv_of_hex[3];
@@ -75,9 +75,9 @@ void API_DEF hex_mesh_gen_simple_uv_6t(vector2f* uv_of_chunk, vector2i chunk_pos
     {
         for (int col = 0; col < chunk_size; col++)
         {
-            auto* data = static_cast<map_cell_data*>(container->get_cell_data(vector2i(cell_start.x + col, cell_start.y + row)));
+            auto data = get_cell_data_s<map_cell_data>(container, vector2i(col, row) + cell_start);
             int start_id = (row * chunk_size + col) * vert_count;
-            if (data->enabled)
+            if (data.enabled)
             {
                 for (int i = 0; i < 6; i++)
                 {
@@ -101,4 +101,52 @@ void API_DEF hex_mesh_gen_connective_uv_6t(vector2f* uv_of_chunk, vector2i chunk
 {
     if (!uv_of_chunk) return;
     if (!is_valid_hex_map(container)) return;
+
+    const int vert_count = 18;
+    auto chunk_size = container->chunk_size;
+    vector2i cell_start = container->chunk2cell(chunk_pos);
+    for (int row = 0; row < chunk_size; row++)
+    {
+        for (int col = 0; col < chunk_size; col++)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                int sub_area_id = 0;
+                vector2i center = offset2axial(cell_start + vector2i(col, row));
+                bool has_cell;
+                vector2i target_axial;
+
+                // 分析四个位置是否存在 enabled 的格子
+                target_axial = center;
+                has_cell = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial)).enabled;
+                sub_area_id |= (int)has_cell;
+
+                target_axial = center + AxialDirs[(i + 1) % 6];
+                has_cell = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial)).enabled;
+                sub_area_id |= (int)has_cell << 1;
+
+                target_axial = center + AxialDirs[(i + 0) % 6];
+                has_cell = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial)).enabled;
+                sub_area_id |= (int)has_cell << 2;
+
+                target_axial = center + AxialDirs[(i + 5) % 6];
+                has_cell = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial)).enabled;
+                sub_area_id |= (int)has_cell << 3;
+
+                const vector2f uv0 = vector2f(1 - half_s3, 0.5f) * 0.25f;
+                const vector2f uv1 = vector2f(1, 1) * 0.25f;
+                const vector2f uv2 = vector2f(1, 0) * 0.25f;
+
+                float x = (sub_area_id % 4) * .25f;
+                float y = .75f - (sub_area_id / 4) * .25f;
+                vector2f uv_offset(x, y);
+
+                int start_id = (row * chunk_size + col) * vert_count + i * 3;
+                uv_of_chunk[start_id + 0] = uv0 + uv_offset;
+                uv_of_chunk[start_id + 1] = uv1 + uv_offset;
+                uv_of_chunk[start_id + 2] = uv2 + uv_offset;
+            }
+
+        }
+    }
 }
