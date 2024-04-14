@@ -67,20 +67,18 @@ namespace HexFlow.Map
 
 
         #region PublicMethod
-        public bool GenerateIfNotExist(Vector3 positionInWorld, out Vector2Int chunkPos)
-        {
-            chunkPos = GetChunkPos(positionInWorld);
-            if (Map.ExistChunk(chunkPos)) return false;
-
-            Map.Generate(chunkPos);
-            return true;
-        }
+        
         public bool GenerateIfNotExist(Vector2Int chunkPos)
         {
             if (Map.ExistChunk(chunkPos)) return false;
 
             Map.Generate(chunkPos);
             return true;
+        }
+        public bool GenerateIfNotExist(Vector3 positionInWorld, out Vector2Int chunkPos)
+        {
+            chunkPos = GetChunkPos(positionInWorld);
+            return GenerateIfNotExist(chunkPos);
         }
 
         public Vector2Int GetCellPos(Vector3 positionInWorld)
@@ -94,6 +92,11 @@ namespace HexFlow.Map
         public Vector2Int GetChunkPos(Vector3 positionInWorld)
         {
             return Map.ToChunkPos(GetCellPos(positionInWorld));
+        }
+
+        public Vector2Int GetChunkPos(Vector2Int cellPos)
+        {
+            return Map.ToChunkPos(cellPos);
         }
 
         public void GetChunkAndCellPos(Vector3 positionInWorld, out Vector2Int chunkPos, out Vector2Int cellPos)
@@ -121,11 +124,7 @@ namespace HexFlow.Map
         public MapCellData GetData(Vector3 positionInWorld) 
         {
             GetChunkAndCellPos(positionInWorld, out var chunkPos, out var cellPos);
-            if (!Map.ExistChunk(chunkPos)) return Map.defaultValue;
-
-            var chunkArray = Map.GetChunkAsArray(chunkPos);
-            cellPos = TransformMapToChunk(chunkPos, cellPos);
-            return chunkArray[cellPos];
+            return GetData(cellPos);
         }
 
         /// <summary>

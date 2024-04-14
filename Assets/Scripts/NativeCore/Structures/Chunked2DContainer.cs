@@ -79,19 +79,37 @@ namespace HexFlow.NativeCore.Structures
 
         public IntPtr RawPtr => _data;
 
+        public void ThrowIfInValidIndex(int x, int y)
+        {
+            if (x < 0 || y < 0 || x >= Size.x || y >= Size.y)
+            {
+                throw new IndexOutOfRangeException($"Try to access ChunkDataProxy with x: {x}, y: {y}, but array size is {Size}");
+            }
+        }
+
         public T this[Vector2Int pos] { get => this[pos.x, pos.y]; set => this[pos.x, pos.y] = value; }
         public unsafe T this[int x, int y]
         {
             get
             {
+                ThrowIfInValidIndex(x, y);
                 var typedPtr = (T*)_data;
                 return typedPtr[y * Size.x + x];
             }
             set
             {
+                ThrowIfInValidIndex(x, y);
                 var typedPtr = (T*)_data;
                 typedPtr[y * Size.x + x] = value;
             }
+        }
+    }
+
+    public class ChunkNotFoundException : Exception
+    {
+        public ChunkNotFoundException(Vector2Int chunkIndex) 
+        : base($"Chunk {chunkIndex} is not found in container.")
+        {
         }
     }
 
@@ -142,7 +160,6 @@ namespace HexFlow.NativeCore.Structures
                 Ntv.IterReset(_ptr, _iter);
             }
         }
-               
 
         /// <summary>
         /// 区块操作
@@ -321,6 +338,10 @@ namespace HexFlow.NativeCore.Structures
 
         public IntPtr GetChunk(Vector2Int chunkPos)
         {
+            if(!ExistChunk(chunkPos))
+            {
+                throw new ChunkNotFoundException(chunkPos);
+            }
             return Ntv.GetChunkData(_ptr, chunkPos);
         }
 
