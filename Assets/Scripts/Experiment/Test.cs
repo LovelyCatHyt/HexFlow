@@ -17,7 +17,7 @@ public class Test : MonoBehaviour
     private void Update()
     {
         Vector2Int pos;
-        if (map.GenearteIfNotExist(_camera.transform.position, out pos))
+        if (map.GenerateIfNotExist(_camera.transform.position, out pos))
         {
             Debug.Log($"Create chunk at: {pos}");
         }

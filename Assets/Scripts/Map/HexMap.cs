@@ -67,7 +67,7 @@ namespace HexFlow.Map
 
 
         #region PublicMethod
-        public bool GenearteIfNotExist(Vector3 positionInWorld, out Vector2Int chunkPos)
+        public bool GenerateIfNotExist(Vector3 positionInWorld, out Vector2Int chunkPos)
         {
             chunkPos = GetChunkPos(positionInWorld);
             if (Map.ExistChunk(chunkPos)) return false;
@@ -131,36 +131,34 @@ namespace HexFlow.Map
         /// <summary>
         /// 向世界坐标下的格点设置数据, 若该坐标无区块则生成后再设置
         /// </summary>
-        public void SetData(Vector3 positionInWorld, MapCellData data, bool updateNeighborChunk = true)
-        {
-            GenearteIfNotExist(positionInWorld, out var chunkPos);
-            var cellPos = GetCellPos(positionInWorld);
-            var chunkArr = Map.GetChunkAsArray(chunkPos);
-            cellPos = TransformMapToChunk(chunkPos, cellPos);
-            chunkArr[cellPos] = data;
-            pendingUpdateUVChunks.Add(chunkPos);
-            if(updateNeighborChunk)
-            {
-                if (cellPos.x == 0) pendingUpdateUVChunks.Add(chunkPos - new Vector2Int(1, 0));
-                if (cellPos.y == 0) pendingUpdateUVChunks.Add(chunkPos - new Vector2Int(0, 1));
-                if (cellPos.x == Map.ChunkSize - 1) pendingUpdateUVChunks.Add(chunkPos + new Vector2Int(1, 0));
-                if (cellPos.y == Map.ChunkSize - 1) pendingUpdateUVChunks.Add(chunkPos + new Vector2Int(0, 1));
-            }
-        }
         public void SetData(Vector2Int cellPos, MapCellData data, bool updateNeighborChunk = true)
         {
             var chunkPos = Map.ToChunkPos(cellPos);
+            GenerateIfNotExist(chunkPos);
             var chunkArr = Map.GetChunkAsArray(chunkPos);
-            cellPos = TransformMapToChunk(cellPos, cellPos);
-            chunkArr[cellPos] = data;
+            var cellInChunk = TransformMapToChunk(chunkPos, cellPos);
+            chunkArr[cellInChunk] = data;
             pendingUpdateUVChunks.Add(chunkPos);
             if (updateNeighborChunk)
             {
-                if (cellPos.x == 0) pendingUpdateUVChunks.Add(chunkPos - new Vector2Int(1, 0));
-                if (cellPos.y == 0) pendingUpdateUVChunks.Add(chunkPos - new Vector2Int(0, 1));
-                if (cellPos.x == Map.ChunkSize - 1) pendingUpdateUVChunks.Add(chunkPos + new Vector2Int(1, 0));
-                if (cellPos.y == Map.ChunkSize - 1) pendingUpdateUVChunks.Add(chunkPos + new Vector2Int(0, 1));
+                var axialPos = cellPos.ToAxial();
+                for (int i = 0; i < 6; i++)
+                {
+                    // 六个邻居都要考虑
+                    var nbrAxial = HexMath.AxialDirs[i] + axialPos;
+                    var nbrOffset = nbrAxial.ToOffset();
+                    var nbrChunk = Map.ToChunkPos(nbrOffset);
+                    pendingUpdateUVChunks.Add(nbrChunk);
+                }
             }
+        }
+        /// <summary>
+        /// 向世界坐标下的格点设置数据, 若该坐标无区块则生成后再设置
+        /// </summary>
+        public void SetData(Vector3 positionInWorld, MapCellData data, bool updateNeighborChunk = true)
+        {
+            var cellPos = GetCellPos(positionInWorld);
+            SetData(cellPos, data, updateNeighborChunk);
         }
 
         public Vector2Int TransformMapToChunk(Vector2Int chunkPos, Vector2Int cellPos)
@@ -184,7 +182,6 @@ namespace HexFlow.Map
         }
 
         #endregion
-
 
         protected void OnChunkCreated(Vector2Int chunkPos, IntPtr chunkData)
         {
@@ -217,10 +214,14 @@ namespace HexFlow.Map
 
         protected void UpdateChunkUV(Vector2Int chunkPos)
         {
-            if (Renderers.TryGetValue(chunkPos, out var r))
+            if (!Renderers.TryGetValue(chunkPos, out var r))
             {
-                UVGenerator.GenerateUVForMap(r.Generator.GeneratedMesh, Map, chunkPos, r.meshType, r.textureType);
+                // 不存在则先生成一下
+                GenerateIfNotExist(chunkPos);
+                r = Renderers[chunkPos];
             }
+
+            UVGenerator.GenerateUVForMap(r.Generator.GeneratedMesh, Map, chunkPos, r.meshType, r.textureType);
         }
     }
 }

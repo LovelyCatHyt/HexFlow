@@ -164,18 +164,28 @@ void API_DEF hex_mesh_gen_connective_uv_6t(vector2f* uv_of_chunk, vector2i chunk
                 has_cell = neighbors[(i + 5) % 6].enabled;
                 sub_area_id |= (int)has_cell << 3;
 
-                const vector2f uv0 = vector2f(1 - half_s3, 0.5f) * 0.25f;
-                const vector2f uv1 = vector2f(1, 1) * 0.25f;
-                const vector2f uv2 = vector2f(1, 0) * 0.25f;
-
-                float x = (sub_area_id % 4) * .25f;
-                float y = .75f - (sub_area_id / 4) * .25f;
-                vector2f uv_offset(x, y);
 
                 int start_id = (row * chunk_size + col) * vert_count + i * 3;
-                uv_of_chunk[start_id + 0] = uv0 + uv_offset;
-                uv_of_chunk[start_id + 1] = uv1 + uv_offset;
-                uv_of_chunk[start_id + 2] = uv2 + uv_offset;
+                if(sub_area_id != 0)
+                {
+                    const vector2f uv0 = vector2f(1 - half_s3, 0.5f) * 0.25f;
+                    const vector2f uv1 = vector2f(1, 1) * 0.25f;
+                    const vector2f uv2 = vector2f(1, 0) * 0.25f;
+
+                    float x = (sub_area_id % 4) * .25f;
+                    float y = .75f - (sub_area_id / 4) * .25f;
+                    vector2f uv_offset(x, y);
+
+                    uv_of_chunk[start_id + 0] = uv0 + uv_offset;
+                    uv_of_chunk[start_id + 1] = uv1 + uv_offset;
+                    uv_of_chunk[start_id + 2] = uv2 + uv_offset;
+                }
+                else
+                {
+                    uv_of_chunk[start_id + 0] = vector2f(0, 0);
+                    uv_of_chunk[start_id + 1] = vector2f(0, 0);
+                    uv_of_chunk[start_id + 2] = vector2f(0, 0);
+                }
             }
 
             move_window_add_col(neighbors, center_data, cell_start + vector2i(col + 1, row), container);

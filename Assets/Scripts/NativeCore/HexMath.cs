@@ -82,5 +82,19 @@ namespace HexFlow.NativeCore
         /// <returns></returns>
         [DllImport(DllName, EntryPoint = "position2axial")]
         public static extern Vector2Int Position2Axial(Vector2 position, float cellSize);
+
+        /// <summary>
+        /// 从右边开始, 逆时针方向的六个 Axial 向量.
+        /// <para>请勿修改数组的值, 否则可能引发方向相关的错误</para>
+        /// </summary>
+        public static readonly Vector2Int[] AxialDirs =
+        {
+            new Vector2Int(1, 0),
+            new Vector2Int(0, 1),
+            new Vector2Int(-1, 1),
+            new Vector2Int(-1, 0),
+            new Vector2Int(0, -1),
+            new Vector2Int(1, -1),
+        };
     }
 }
