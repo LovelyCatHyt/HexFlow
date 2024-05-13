@@ -4,6 +4,8 @@ using UnityEngine;
 using HexFlow.NativeCore;
 using HexFlow.NativeCore.Map;
 using HexFlow.NativeCore.Structures;
+using Unitilities.Serialization;
+using System.IO;
 
 namespace HexFlow.Map
 {

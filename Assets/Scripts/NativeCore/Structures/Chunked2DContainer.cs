@@ -116,7 +116,7 @@ namespace HexFlow.NativeCore.Structures
     /// <summary>
     /// 按区块存储的, 以2D坐标索引的容器
     /// </summary>
-    public class Chunked2DContainer<T> : IDisposable, IEnumerable<KeyValuePair<Vector2Int, IntPtr>>
+    public class Chunked2DContainer<T> : IDisposable, IEnumerable<KeyValuePair<Vector2Int, IntPtr>>, IBinarySerializable
         where T : unmanaged
     {
         public class Iterator : IEnumerator<KeyValuePair<Vector2Int, IntPtr>>
@@ -128,14 +128,11 @@ namespace HexFlow.NativeCore.Structures
             {
                 _ptr = container._ptr;
                 _iter = Ntv.CreateIter(_ptr);
+                _cachedValid = false;
             }
 
             public Vector2Int CurrentPos => Ntv.IterKey(_iter);
             public IntPtr CurrentData => Ntv.IterValue(_iter);
-
-            public KeyValuePair<Vector2Int, IntPtr> Current => new KeyValuePair<Vector2Int, IntPtr>(CurrentPos, CurrentData);
-
-            object IEnumerator.Current => Current;
 
             // 析构函数也删除一下以防坏事发生
             ~Iterator()
@@ -149,10 +146,26 @@ namespace HexFlow.NativeCore.Structures
                 _iter = IntPtr.Zero;
             }
 
+            public bool _cachedValid = false;
+
+            // 由于 cpp 层的迭代器比 c# 的迭代器提前一步, 因此要先存一对数据
+            public KeyValuePair<Vector2Int, IntPtr> _cachedPair;
+
+            // 当前迭代元素的 key 和 value
+            public KeyValuePair<Vector2Int, IntPtr> Current => _cachedValid ? _cachedPair : throw new IndexOutOfRangeException();
+
+            object IEnumerator.Current => Current;
+
             public bool MoveNext()
             {
-                Ntv.IterAdvance(_iter);
-                return Ntv.IterValid(_ptr, _iter);
+                // C# 迭代器中, MoveNext 的结果对应的是 cpp 迭代前的结果
+                _cachedValid = Ntv.IterValid(_ptr, _iter);
+                if(_cachedValid)
+                {
+                    _cachedPair = new KeyValuePair<Vector2Int, IntPtr>(CurrentPos, CurrentData);
+                    Ntv.IterAdvance(_iter);
+                }
+                return _cachedValid;
             }
 
             public void Reset()
@@ -172,14 +185,7 @@ namespace HexFlow.NativeCore.Structures
 
         public readonly int ElementCountPerChunk;
 
-        public int ChunkCount => Ntv.ChunkCount(_ptr);
-
-        /// <summary>
-        /// 每个区块序列化时占用的实际数据长度
-        /// </summary>
-        public int ChunkDataByteLength =>
-            UnsafeUtils.SizeOf<Vector2Int>() +                  /*区块坐标*/
-            UnsafeUtils.SizeOf<T>() * ChunkSize * ChunkSize;    /*单个区块数据*/
+        public int ChunkCount => Ntv.ChunkCount(_ptr);        
 
         public int seed;
 
@@ -218,54 +224,65 @@ namespace HexFlow.NativeCore.Structures
         }
 
         #region IBinarySerializable
+
+        /// <summary>
+        /// 每个区块核心数据的长度
+        /// </summary>
+        public int ChunkDataLengthNoHead => UnsafeUtils.SizeOf<T>() * ChunkSize * ChunkSize;
+
+        /// <summary>
+        /// 每个区块序列化时占用的实际数据长度
+        /// </summary>
+        public int ChunkDataLengthWithHead => UnsafeUtils.SizeOf<Vector2Int>() + ChunkDataLengthNoHead;
         public long SerializeByteLength =>
-            sizeof(long) +                      /*表示区块数据总长度的长整数*/
-            ChunkCount * ChunkDataByteLength;   /*所有区块实际数据的长度*/
+            sizeof(int) +                           /*表示区块数目的整数*/
+            ChunkCount * ChunkDataLengthWithHead;   /*所有区块实际数据的长度*/
 
-        public string FileExtension => $"{nameof(T)}.chk"; // 保留类型名, 方便未来做特殊处理或 Debug. "chk" 表示 chunk.
+        public string FileExtension => $"{typeof(T).Name}.chk"; // 保留类型名, 方便未来做特殊处理或 Debug. "chk" 表示 chunk.
 
-        //public void Serialize(BinaryWriter writer)
-        //{
-        //    writer.Write(SerializeByteLength);
-        //    var chunkPosArray = _map.Keys.ToArray();
-        //    BinarySerializeUtils.Serialize(chunkPosArray, writer, false);
-        //    foreach (var pos in chunkPosArray)
-        //    {
-        //        var data = _map[pos];
-        //        UnsafeUtils.SaveToBinaryWriter(data.Data, writer);
-        //    }
-        //}
+        public void Serialize(BinaryWriter writer)
+        {
+            writer.Write(ChunkCount);
+            foreach (var kv in this)
+            {
+                writer.Write(kv.Key.x);
+                writer.Write(kv.Key.y);
+                unsafe
+                {
+                    var span = new ReadOnlySpan<byte>(kv.Value.ToPointer(), ChunkDataLengthNoHead);
+                    writer.Write(span);
+                }
+            }
+        }
 
-        //public void Deserialize(BinaryReader reader)
-        //{
-        //    var byteLength = reader.ReadInt32();
-        //    var calculatedCount = byteLength / ChunkDataByteLength;
-        //    if (byteLength % calculatedCount != 0)
-        //    {
-        //        // 不能整除, 说明肯定有哪里不对劲
-        //        // 由于二进制序列化的额外信息极其有限, 无法确定下一个有效数据是什么,
-        //        // 假设所有数据块都在开头标记字节长度, 则跳过这个长度是相对安全的
-        //        reader.BaseStream.Seek(byteLength, SeekOrigin.Current);
-        //        throw new SizeOfByteNotMatchException(byteLength, calculatedCount * ChunkDataByteLength);
-        //    }
-        //    // 读取坐标数组
-        //    var posArray = BinarySerializeUtils.Deserialize<Vector2Int>(reader, calculatedCount);
-        //    // 读取具体数据
-        //    foreach (var pos in posArray)
-        //    {
-        //        Array2D<T> newData = new Array2D<T>(ChunkSize, ChunkSize);
-        //        _map[pos] = newData;
-        //        UnsafeUtils.LoadFromBinaryReader(newData.Data, reader);
-        //    }
-        //    // 调用事件
-        //    if (onChunkCreated != null)
-        //    {
-        //        foreach (var pos in posArray)
-        //        {
-        //            onChunkCreated.Invoke(pos, _map[pos]);
-        //        }
-        //    }
-        //}
+        public void Deserialize(BinaryReader reader)
+        {
+            // 先清除已有的所有区块, 比如初始化大概率已经生成的
+            var keys = new List<Vector2Int>();
+            foreach (var kv in this)
+            {
+                keys.Add(kv.Key);
+            }
+            foreach(var key in keys)
+            {
+                Remove(key);
+            }
+
+            int chunkCount = reader.ReadInt32();
+            for (int i = 0; i < chunkCount; i++)
+            {
+                var x = reader.ReadInt32();
+                var y = reader.ReadInt32();
+                var chunkPos = new Vector2Int(x, y);
+                
+                var chunkPtr = CreateRawChunk(chunkPos);
+                unsafe
+                {
+                    reader.BaseStream.Read(new Span<byte>(chunkPtr.ToPointer(), ChunkDataLengthNoHead));
+                }
+                onChunkCreated?.Invoke(chunkPos, chunkPtr);
+            }
+        }
         #endregion
 
         public Vector2Int ToCellPos(Vector2Int chunkPos) => chunkPos * ChunkSize;
@@ -275,11 +292,7 @@ namespace HexFlow.NativeCore.Structures
             return new Vector2Int(MathTool.FloorDiv(cellPos.x, ChunkSize), MathTool.FloorDiv(cellPos.y, ChunkSize));
         }
 
-        /// <summary>
-        /// 在指定区块坐标上生成区块
-        /// <para>如果该区块已创建, 会覆盖已有的数据</para>
-        /// </summary>
-        public void Generate(Vector2Int chunkPos)
+        public IntPtr CreateRawChunk(Vector2Int chunkPos)
         {
             IntPtr targetChunkData;
             if (!Ntv.ExistChunk(_ptr, chunkPos))
@@ -290,10 +303,20 @@ namespace HexFlow.NativeCore.Structures
             {
                 targetChunkData = Ntv.GetChunkData(_ptr, chunkPos);
             }
+            return targetChunkData;
+        }
 
-            if (chunkGenerator != null) chunkGenerator.Generate(chunkPos, targetChunkData, seed, ChunkSize);
+        /// <summary>
+        /// 在指定区块坐标上生成区块
+        /// <para>如果该区块已创建, 会覆盖已有的数据</para>
+        /// </summary>
+        public void Generate(Vector2Int chunkPos, bool runGenerator = true)
+        {
+            IntPtr targetChunkData = CreateRawChunk(chunkPos);
+            
+            if (chunkGenerator != null && runGenerator) chunkGenerator.Generate(chunkPos, targetChunkData, seed, ChunkSize);
 
-            onChunkCreated?.Invoke(chunkPos, Ntv.GetChunkData(_ptr, chunkPos));
+            onChunkCreated?.Invoke(chunkPos, targetChunkData);
         }
         /// <summary>
         /// 在指定区块区域上生成区块, 区域包含两个端点
