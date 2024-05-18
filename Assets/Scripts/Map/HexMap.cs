@@ -15,7 +15,7 @@ namespace HexFlow.Map
 
         [SerializeField] protected ChunkRenderer chunkRendererPrefab;
 
-        public Chunked2DContainer<MapCellData> Map { get; protected set; }
+        public Chunked2DContainer<MapCellData> MapData { get; protected set; }
         public Dictionary<Vector2Int, ChunkRenderer> Renderers { get; protected set; }
 
         protected HashSet<Vector2Int> pendingUpdateUVChunks = new HashSet<Vector2Int>();
@@ -43,10 +43,10 @@ namespace HexFlow.Map
                 Debug.LogError("Chunk renderer prefab missing! Will throw NRE when creating chunks.");
             }
 
-            Map = new Chunked2DContainer<MapCellData>(default, (int)(Time.time * 1000), ChunkSize);
-            Map.onBeforeChunkRemoved += OnChunkRemoved;
-            Map.onChunkCreated += OnChunkCreated;
-            Map.chunkGenerator = new CopyDefaultGenerator<MapCellData>(Map.defaultValue);
+            MapData = new Chunked2DContainer<MapCellData>(default, (int)(Time.time * 1000), ChunkSize);
+            MapData.onBeforeChunkRemoved += OnChunkRemoved;
+            MapData.onChunkCreated += OnChunkCreated;
+            MapData.chunkGenerator = new CopyDefaultGenerator<MapCellData>(MapData.defaultValue);
 
             Renderers = new Dictionary<Vector2Int, ChunkRenderer>();
         }
@@ -62,7 +62,7 @@ namespace HexFlow.Map
 
         private void OnDestroy()
         {
-            Map.Dispose();
+            MapData.Dispose();
         }
 
         #endregion
@@ -72,9 +72,9 @@ namespace HexFlow.Map
         
         public bool GenerateIfNotExist(Vector2Int chunkPos)
         {
-            if (Map.ExistChunk(chunkPos)) return false;
+            if (MapData.ExistChunk(chunkPos)) return false;
 
-            Map.Generate(chunkPos);
+            MapData.Generate(chunkPos);
             return true;
         }
         public bool GenerateIfNotExist(Vector3 positionInWorld, out Vector2Int chunkPos)
@@ -93,33 +93,33 @@ namespace HexFlow.Map
 
         public Vector2Int GetChunkPos(Vector3 positionInWorld)
         {
-            return Map.ToChunkPos(GetCellPos(positionInWorld));
+            return MapData.ToChunkPos(GetCellPos(positionInWorld));
         }
 
         public Vector2Int GetChunkPos(Vector2Int cellPos)
         {
-            return Map.ToChunkPos(cellPos);
+            return MapData.ToChunkPos(cellPos);
         }
 
         public void GetChunkAndCellPos(Vector3 positionInWorld, out Vector2Int chunkPos, out Vector2Int cellPos)
         {
             cellPos = GetCellPos(positionInWorld);
-            chunkPos = Map.ToChunkPos(cellPos);
+            chunkPos = MapData.ToChunkPos(cellPos);
         }
 
         public Vector3 GetChunkOrigin(Vector2Int chunkPos)
         {
-            var axial = Map.ToCellPos(chunkPos).ToAxial();
+            var axial = MapData.ToCellPos(chunkPos).ToAxial();
             var pos2D = HexMath.Axial2Position(axial) * Radius;
             return transform.TransformPoint(new Vector3(pos2D.x, 0, pos2D.y));
         }
 
         public MapCellData GetData(Vector2Int cellPos)
         {
-            var chunkPos = Map.ToChunkPos(cellPos);
-            if (!Map.ExistChunk(chunkPos)) return Map.defaultValue;
+            var chunkPos = MapData.ToChunkPos(cellPos);
+            if (!MapData.ExistChunk(chunkPos)) return MapData.defaultValue;
 
-            var chunkArray = Map.GetChunkAsArray(chunkPos);
+            var chunkArray = MapData.GetChunkAsArray(chunkPos);
             cellPos = TransformMapToChunk(chunkPos, cellPos);
             return chunkArray[cellPos];
         }
@@ -134,9 +134,9 @@ namespace HexFlow.Map
         /// </summary>
         public void SetData(Vector2Int cellPos, MapCellData data, bool updateNeighborChunk = true)
         {
-            var chunkPos = Map.ToChunkPos(cellPos);
+            var chunkPos = MapData.ToChunkPos(cellPos);
             GenerateIfNotExist(chunkPos);
-            var chunkArr = Map.GetChunkAsArray(chunkPos);
+            var chunkArr = MapData.GetChunkAsArray(chunkPos);
             var cellInChunk = TransformMapToChunk(chunkPos, cellPos);
             chunkArr[cellInChunk] = data;
             pendingUpdateUVChunks.Add(chunkPos);
@@ -148,7 +148,7 @@ namespace HexFlow.Map
                     // 六个邻居都要考虑
                     var nbrAxial = HexMath.AxialDirs[i] + axialPos;
                     var nbrOffset = nbrAxial.ToOffset();
-                    var nbrChunk = Map.ToChunkPos(nbrOffset);
+                    var nbrChunk = MapData.ToChunkPos(nbrOffset);
                     pendingUpdateUVChunks.Add(nbrChunk);
                 }
             }
@@ -164,7 +164,7 @@ namespace HexFlow.Map
 
         public Vector2Int TransformMapToChunk(Vector2Int chunkPos, Vector2Int cellPos)
         {
-            var origin = Map.ChunkSize * chunkPos;
+            var origin = MapData.ChunkSize * chunkPos;
             return cellPos - origin;
         }
 
@@ -186,7 +186,7 @@ namespace HexFlow.Map
 
         protected void OnChunkCreated(Vector2Int chunkPos, IntPtr chunkData)
         {
-            CreateChunkGO(chunkPos, new ChunkDataProxy<MapCellData>(chunkData, Map.ChunkSize));
+            CreateChunkGO(chunkPos, new ChunkDataProxy<MapCellData>(chunkData, MapData.ChunkSize));
         }
 
         protected void OnChunkRemoved(Vector2Int chunkPos, IntPtr chunkData)
@@ -222,7 +222,7 @@ namespace HexFlow.Map
                 r = Renderers[chunkPos];
             }
 
-            UVGenerator.GenerateUVForMap(r.Generator.GeneratedMesh, Map, chunkPos, r.meshType, r.textureType);
+            UVGenerator.GenerateUVForMap(r.Generator.GeneratedMesh, MapData, chunkPos, r.meshType, r.textureType);
         }
     }
 }

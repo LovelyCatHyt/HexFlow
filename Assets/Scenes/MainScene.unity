@@ -333,6 +333,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   map: {fileID: 669617720}
+  fileNameNoExtend: Test
+  iterateMap: 0
+  saveMap: 0
+  loadMap: 0
 --- !u!1 &1004082004
 GameObject:
   m_ObjectHideFlags: 0

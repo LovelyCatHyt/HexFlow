@@ -2,6 +2,8 @@ using UnityEngine;
 using HexFlow.Map;
 using Unitilities.PropAttr;
 using Unitilities.Serialization;
+using Unitilities.DebugUtil;
+using System.IO;
 
 public class Test : MonoBehaviour
 {
@@ -41,13 +43,6 @@ public class Test : MonoBehaviour
             data.enabled = false;
             map.SetData(hitPos, data);
         }
-
-        if (Input.GetMouseButtonUp(2))
-        {
-            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            map.RaycastToCell(ray, out var cellPos, out var hitPos);
-            Debug.Log($"mouseup at cellPos: {cellPos}");
-        }
     }
 
     [ButtonInvoke(nameof(IterateMap))]
@@ -55,20 +50,16 @@ public class Test : MonoBehaviour
 
     public void IterateMap()
     {
-        var count = 0;
-        foreach (var keyValue in map.Map)
-        {
-            Debug.Log($"position:{keyValue.Key}");
-            count++;
-        }
-        Debug.Log($"Iterate count({count}) == Map.ChunkCount({map.Map.ChunkCount}): {count == map.Map.ChunkCount}");
+        Vector2Int[] chkPosArr = map.MapData.GetKeys(true);
+        Debug.Log($"Iterate count({chkPosArr.Length}) == Map.ChunkCount({map.MapData.ChunkCount}): {chkPosArr.Length == map.MapData.ChunkCount}");
+        Debug.Log(ListPrinter.PrintLines(chkPosArr));
     }
 
     [ButtonInvoke(nameof(SaveMap))]
     public bool saveMap;
     public void SaveMap()
     {
-        map.Map.SaveTo(fileNameNoExtend, DataScope.Save);
+        map.MapData.SaveTo(fileNameNoExtend, DataScope.Save);
         Debug.Log("Saved");
     }
 
@@ -76,7 +67,14 @@ public class Test : MonoBehaviour
     public bool loadMap;
     public void LoadMap()
     {
-        map.Map.LoadFrom(fileNameNoExtend, DataScope.Save);
-        Debug.Log("Loaded");
+        try
+        {
+            map.MapData.LoadFrom(fileNameNoExtend, DataScope.Save);
+            Debug.Log("Loaded");
+        }
+        catch (FileNotFoundException)
+        {
+            Debug.Log("File not found!");
+        }
     }
 }

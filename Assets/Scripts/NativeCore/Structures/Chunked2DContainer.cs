@@ -280,7 +280,15 @@ namespace HexFlow.NativeCore.Structures
                 {
                     reader.BaseStream.Read(new Span<byte>(chunkPtr.ToPointer(), ChunkDataLengthNoHead));
                 }
-                onChunkCreated?.Invoke(chunkPos, chunkPtr);
+            }
+
+            // 读取完再进行事件回调, 这样监听者读取到的任意区块的邻居信息都是完整的. 当然, 这里假设监听者对读取顺序不敏感.
+            if (onChunkCreated != null)
+            {
+                foreach (var keyValue in this)
+                {   
+                    onChunkCreated.Invoke(keyValue.Key, keyValue.Value);
+                } 
             }
         }
         #endregion
@@ -371,6 +379,26 @@ namespace HexFlow.NativeCore.Structures
         public INative2DArray<T> GetChunkAsArray(Vector2Int chunkPos)
         {
             return new ChunkDataProxy<T>(GetChunk(chunkPos), ChunkSize);
+        }
+
+        public Vector2Int[] GetKeys(bool sorted = false)
+        {
+            var result = new Vector2Int[ChunkCount];
+            var id = 0;
+            foreach (var kv in this)
+            {
+                result[id] = kv.Key;
+                id++;
+            }
+            if (sorted)
+            {
+                Array.Sort(result, (a, b) =>
+                {
+                    if (a.y != b.y) return a.y - b.y;
+                    return a.x - b.x;
+                });
+            }
+            return result;
         }
 
         ~Chunked2DContainer()
