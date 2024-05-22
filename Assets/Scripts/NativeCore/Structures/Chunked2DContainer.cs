@@ -197,6 +197,8 @@ namespace HexFlow.NativeCore.Structures
 
         public event ChunAction onChunkCreated;
 
+        public event ChunAction onChunkRegen;
+
         public event ChunAction onBeforeChunkRemoved;
 
         /// <summary>
@@ -320,11 +322,14 @@ namespace HexFlow.NativeCore.Structures
         /// </summary>
         public void Generate(Vector2Int chunkPos, bool runGenerator = true)
         {
+            bool isReGenerate = ExistChunk(chunkPos);
             IntPtr targetChunkData = CreateRawChunk(chunkPos);
             
             if (chunkGenerator != null && runGenerator) chunkGenerator.Generate(chunkPos, targetChunkData, seed, ChunkSize);
 
-            onChunkCreated?.Invoke(chunkPos, targetChunkData);
+            // 必须是全新创建的区块调用 onChunkCreated
+            if (!isReGenerate) onChunkCreated?.Invoke(chunkPos, targetChunkData);
+            else onChunkRegen?.Invoke(chunkPos, targetChunkData);
         }
         /// <summary>
         /// 在指定区块区域上生成区块, 区域包含两个端点

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "uv_generator.h"
 #include "map.h"
+#include "hex_map.h"
 #include "mesh_generator.h"
 
 // 可以根据 HexFlow\NativeLibrary\Readme.md 里的图和 
@@ -16,11 +17,6 @@ const vector2f uv_of_hex[] =
     get_vec2_from_angle(270) * 0.5f + vector2f(0.5f, 0.5f),
     get_vec2_from_angle(330) * 0.5f + vector2f(0.5f, 0.5f)
 };
-
-bool is_valid_hex_map(chunked_2d_container* container)
-{
-    return container && container->element_size == sizeof(map_cell_data);
-}
 
 // 构建滑动窗口完整数据
 void make_window(map_cell_data neighbors[6], map_cell_data& center, const vector2i& cell_pos, /*NotNull*/ chunked_2d_container* container)

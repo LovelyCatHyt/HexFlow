@@ -4,8 +4,6 @@
 #include "hex_math.h"
 #include "chunked_2d_container.h"
 
-#define CONST_COS(RAD, VAL) VAL
-
 extern "C"
 {
     // 基于 4 三角形, 其中 1 大 3 小的, 作为单个单元的网格类型生成简单 uv

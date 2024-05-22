@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="头文件">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="资源文件">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
@@ -16,57 +8,86 @@
     <Filter Include="hex_map">
       <UniqueIdentifier>{149b203e-1efc-449c-8a5f-0ee4ac2137ee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{f018bfd4-115f-4ee6-a660-6be1ca959fa2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="random">
+      <UniqueIdentifier>{99139c47-b4f2-4ab3-9c7f-0617aeeb6dce}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="math_type.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="hex_math.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="mesh_generator.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="map.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="chunked_2d_container.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="chunked_2d_container_export.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="math.hpp">
-      <Filter>头文件</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="uv_generator.h">
+      <Filter>hex_map</Filter>
+    </ClInclude>
+    <ClInclude Include="chunked_2d_container.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="chunked_2d_container_export.hpp">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="hex_math.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="map.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="math.hpp">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="math_type.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh_generator.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="terrain_gen.h">
+      <Filter>hex_map</Filter>
+    </ClInclude>
+    <ClInclude Include="perlin_noise.hpp">
+      <Filter>random</Filter>
+    </ClInclude>
+    <ClInclude Include="hex_map.h">
       <Filter>hex_map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="hex_math.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="mesh_generator.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="map.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="chunked_2d_container.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="chunked_2d_container_export.cpp">
-      <Filter>源文件</Filter>
+      <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="uv_generator.cpp">
       <Filter>hex_map</Filter>
+    </ClCompile>
+    <ClCompile Include="chunked_2d_container.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="chunked_2d_container_export.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="hex_math.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="map.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh_generator.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="terrain_gen.cpp">
+      <Filter>hex_map</Filter>
+    </ClCompile>
+    <ClCompile Include="hex_map.cpp">
+      <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

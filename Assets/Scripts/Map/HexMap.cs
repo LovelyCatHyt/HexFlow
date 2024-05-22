@@ -6,6 +6,7 @@ using HexFlow.NativeCore.Map;
 using HexFlow.NativeCore.Structures;
 using Unitilities.Serialization;
 using System.IO;
+using System.Linq;
 
 namespace HexFlow.Map
 {
@@ -46,16 +47,19 @@ namespace HexFlow.Map
             MapData = new Chunked2DContainer<MapCellData>(default, (int)(Time.time * 1000), ChunkSize);
             MapData.onBeforeChunkRemoved += OnChunkRemoved;
             MapData.onChunkCreated += OnChunkCreated;
+            MapData.onChunkRegen += OnChunkRegenerate;
             MapData.chunkGenerator = new CopyDefaultGenerator<MapCellData>(MapData.defaultValue);
 
             Renderers = new Dictionary<Vector2Int, ChunkRenderer>();
         }
 
+
         private void LateUpdate()
         {
-            foreach(var chunkPos in pendingUpdateUVChunks)
+            // 用 Linq 复制一份坐标数组, 因为在生成过程可能会添加坐标(尽管就是参数里的同一个坐标)
+            foreach (var chunkPos in pendingUpdateUVChunks.ToArray())
             {
-                UpdateChunkUV(chunkPos);
+                UpdateChunkUVImmiediate(chunkPos);
             }
             pendingUpdateUVChunks.Clear();
         }
@@ -69,12 +73,28 @@ namespace HexFlow.Map
 
 
         #region PublicMethod
-        
+
+        public void Generate(Vector2Int chunkPos)
+        {
+            MapData.Generate(chunkPos);
+            // 创建时也要注意周围区块的更新
+            for (int dy = -1; dy <= 1; dy++)
+            {
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    if (dx != 0 && dy != 0)
+                    {
+                        UpdateChunkUV(chunkPos + new Vector2Int(dx, dy));
+                    }
+                }
+            }
+        }
+
         public bool GenerateIfNotExist(Vector2Int chunkPos)
         {
             if (MapData.ExistChunk(chunkPos)) return false;
 
-            MapData.Generate(chunkPos);
+            Generate(chunkPos);
             return true;
         }
         public bool GenerateIfNotExist(Vector3 positionInWorld, out Vector2Int chunkPos)
@@ -123,7 +143,7 @@ namespace HexFlow.Map
             cellPos = TransformMapToChunk(chunkPos, cellPos);
             return chunkArray[cellPos];
         }
-        public MapCellData GetData(Vector3 positionInWorld) 
+        public MapCellData GetData(Vector3 positionInWorld)
         {
             GetChunkAndCellPos(positionInWorld, out var chunkPos, out var cellPos);
             return GetData(cellPos);
@@ -184,15 +204,32 @@ namespace HexFlow.Map
 
         #endregion
 
+        #region Callback
+
         protected void OnChunkCreated(Vector2Int chunkPos, IntPtr chunkData)
         {
             CreateChunkGO(chunkPos, new ChunkDataProxy<MapCellData>(chunkData, MapData.ChunkSize));
+        }
+
+        protected void OnChunkRegenerate(Vector2Int chunkPos, IntPtr chunkData)
+        {
+            if (Renderers.TryGetValue(chunkPos, out var renderer))
+            {
+                renderer.Init(GetChunkOrigin(chunkPos), Radius, new ChunkDataProxy<MapCellData>(chunkData, MapData.ChunkSize));
+                UpdateChunkUV(chunkPos);
+            }
+            else
+            {
+                CreateChunkGO(chunkPos, new ChunkDataProxy<MapCellData>(chunkData, MapData.ChunkSize));
+            }
         }
 
         protected void OnChunkRemoved(Vector2Int chunkPos, IntPtr chunkData)
         {
             Destroy(Renderers[chunkPos].gameObject);
         }
+
+        #endregion
 
         protected void CreateChunkGO(Vector2Int chunkPos, INative2DArray<MapCellData> chunkData)
         {
@@ -204,7 +241,15 @@ namespace HexFlow.Map
             var r = go.GetComponent<ChunkRenderer>();
             Renderers[chunkPos] = r;
             r.Init(worldPos, Radius, chunkData);
-            UpdateChunkUV(chunkPos);
+            // 周围的区块的边界可能也会被影响, 因此都标记一下
+            for (int dy = -1; dy <= 1; dy++)
+            {
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    UpdateChunkUV(chunkPos + new Vector2Int(dx, dy));
+                }
+            }
+
         }
 
         protected void RemoveChunkGO(Vector2Int chunkPos)
@@ -213,7 +258,23 @@ namespace HexFlow.Map
             Destroy(Renderers[chunkPos].gameObject);
         }
 
-        protected void UpdateChunkUV(Vector2Int chunkPos)
+        /// <summary>
+        /// 更新指定区块 UV. 不会立即执行, 而是提交到等待队列, 在合适的时机执行.
+        /// <para></para>
+        /// </summary>
+        protected void UpdateChunkUV(Vector2Int chunkPos, bool createIfNotExist = false)
+        {
+            if (createIfNotExist || MapData.ExistChunk(chunkPos))
+            {
+                pendingUpdateUVChunks.Add(chunkPos);
+            }
+        }
+
+        /// <summary>
+        /// 立即更新区块的 UV. 区块不存在则先生成再更新 UV. 尽量避免在除了 Update 批量处理等待列表之外的地方调用.
+        /// </summary>
+        /// <param name="chunkPos"></param>
+        protected void UpdateChunkUVImmiediate(Vector2Int chunkPos)
         {
             if (!Renderers.TryGetValue(chunkPos, out var r))
             {

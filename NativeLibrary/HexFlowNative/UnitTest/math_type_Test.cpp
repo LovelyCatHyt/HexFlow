@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "math_type.h"
+#include "perlin_noise.hpp"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -59,6 +60,22 @@ namespace UnitTest
             Assert::AreEqual(-2.0f, v3.x);
             Assert::AreEqual(-1.0f, v3.y);
             Assert::AreEqual(0.0f, v3.z);
+        }
+
+        TEST_METHOD(TestPerlinNoiseDeterminism)
+        {
+            // 仅调用默认的初始化而不提供参数时, 使用默认的随机排列数组.
+            siv::BasicPerlinNoise<float> noise1;
+            siv::BasicPerlinNoise<float> noise2;
+            
+
+            for (float y = 0; y < 10; y += 1.f)
+            {
+                for (float x = 0; x < 10; x += 1.f)
+                {
+                    Assert::AreEqual(noise1.noise2D_01(x, y), noise2.noise2D_01(x, y));
+                }
+            }
         }
     };
 }

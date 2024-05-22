@@ -334,6 +334,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   map: {fileID: 669617720}
   fileNameNoExtend: Test
+  startChunk: {x: -8, y: -8}
+  endChunk: {x: 8, y: 8}
+  threshold: 0
+  noiseScale: {x: 0.03, y: 0.02}
+  noiseOffset: {x: 0, y: 0}
+  waveNum: 8
+  regenerate: 0
   iterateMap: 0
   saveMap: 0
   loadMap: 0

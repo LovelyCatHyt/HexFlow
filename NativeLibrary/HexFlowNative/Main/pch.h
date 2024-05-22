@@ -7,3 +7,7 @@
 #   define API_DEF __declspec(dllimport)
 #endif // COMPILER_EXPORTS
 
+typedef unsigned char uint8;
+typedef char int8;
+typedef unsigned int uint32;
+typedef int int32;

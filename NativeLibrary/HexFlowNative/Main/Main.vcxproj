@@ -176,17 +176,21 @@ copy $(SolutionDir)$(Platform)\$(Configuration)\Main.pdb $(SolutionDir)..\..\Ass
   <ItemGroup>
     <ClInclude Include="chunked_2d_container.h" />
     <ClInclude Include="chunked_2d_container_export.hpp" />
+    <ClInclude Include="hex_map.h" />
     <ClInclude Include="hex_math.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="math.hpp" />
     <ClInclude Include="math_type.h" />
     <ClInclude Include="mesh_generator.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="perlin_noise.hpp" />
+    <ClInclude Include="terrain_gen.h" />
     <ClInclude Include="uv_generator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="chunked_2d_container.cpp" />
     <ClCompile Include="chunked_2d_container_export.cpp" />
+    <ClCompile Include="hex_map.cpp" />
     <ClCompile Include="hex_math.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="mesh_generator.cpp" />
@@ -196,6 +200,7 @@ copy $(SolutionDir)$(Platform)\$(Configuration)\Main.pdb $(SolutionDir)..\..\Ass
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="terrain_gen.cpp" />
     <ClCompile Include="uv_generator.cpp" />
   </ItemGroup>
   <ItemGroup>
