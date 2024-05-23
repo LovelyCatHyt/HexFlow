@@ -60,6 +60,9 @@
     <ClInclude Include="hex_map.h">
       <Filter>hex_map</Filter>
     </ClInclude>
+    <ClInclude Include="neighbor_chunk_visitor.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -87,6 +90,9 @@
       <Filter>hex_map</Filter>
     </ClCompile>
     <ClCompile Include="hex_map.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="neighbor_chunk_visitor.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

@@ -3,6 +3,7 @@
 #include "map.h"
 #include "hex_map.h"
 #include "mesh_generator.h"
+#include "neighbor_chunk_visitor.h"
 
 // 可以根据 HexFlow\NativeLibrary\Readme.md 里的图和 
 // HexFlow\NativeLibrary\HexFlowNative\Main\mesh_generator.cpp 里的函数确定不同网格类型里顶点的顺序
@@ -19,19 +20,19 @@ const vector2f uv_of_hex[] =
 };
 
 // 构建滑动窗口完整数据
-void make_window(map_cell_data neighbors[6], map_cell_data& center, const vector2i& cell_pos, /*NotNull*/ chunked_2d_container* container)
+void make_window(map_cell_data neighbors[6], map_cell_data& center, const vector2i& cell_pos, const neighbor_chunk_visitor& visitor)
 {
-    center = get_cell_data_s<map_cell_data>(container, cell_pos);
+    center = visitor.get_cell_data<map_cell_data>(cell_pos);
     vector2i center_axial = offset2axial(cell_pos);
     for (int i = 0; i < 6; i++)
     {
         auto axial = center_axial + AxialDirs[i];
-        neighbors[i] = get_cell_data_s<map_cell_data>(container, axial2offset(axial));
+        neighbors[i] = visitor.get_cell_data<map_cell_data>(axial2offset(axial));
     }
 }
 
 // 滑动窗口, 向右移一格, 只需要读取3次数据
-void move_window_add_col(map_cell_data neighbors[6], map_cell_data& center, const vector2i& next_cell_pos, /*NotNull*/ chunked_2d_container* container)
+void move_window_add_col(map_cell_data neighbors[6], map_cell_data& center, const vector2i& next_cell_pos, const neighbor_chunk_visitor& visitor)
 {
     neighbors[2]    = neighbors[1];
     neighbors[3]    = center;
@@ -42,13 +43,13 @@ void move_window_add_col(map_cell_data neighbors[6], map_cell_data& center, cons
     vector2i target_axial;
 
     target_axial = next_axial + AxialDirs[0];
-    neighbors[0]    = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial));
+    neighbors[0] = visitor.get_cell_data<map_cell_data>(axial2offset(target_axial));
 
     target_axial = next_axial + AxialDirs[1];
-    neighbors[1] = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial));
+    neighbors[1] = visitor.get_cell_data<map_cell_data>(axial2offset(target_axial));
 
     target_axial = next_axial + AxialDirs[5];
-    neighbors[5] = get_cell_data_s<map_cell_data>(container, axial2offset(target_axial));
+    neighbors[5] = visitor.get_cell_data<map_cell_data>(axial2offset(target_axial));
 }
 
 void API_DEF hex_mesh_gen_simple_uv_4t(vector2f* uv_of_chunk, vector2i chunk_pos, chunked_2d_container* container)
@@ -134,11 +135,13 @@ void API_DEF hex_mesh_gen_connective_uv_6t(vector2f* uv_of_chunk, vector2i chunk
     const int vert_count = 18;
     auto chunk_size = container->chunk_size;
     vector2i cell_start = container->chunk2cell(chunk_pos);
+
+    neighbor_chunk_visitor visitor = neighbor_chunk_visitor::make_visitor_at_chunk(container, chunk_pos);
     for (int row = 0; row < chunk_size; row++)
     {
         map_cell_data neighbors[6];
         map_cell_data center_data;
-        make_window(neighbors, center_data, cell_start + vector2i(0, row), container);
+        make_window(neighbors, center_data, cell_start + vector2i(0, row), visitor);
         
         for (int col = 0; col < chunk_size; col++)
         {
@@ -184,7 +187,7 @@ void API_DEF hex_mesh_gen_connective_uv_6t(vector2f* uv_of_chunk, vector2i chunk
                 }
             }
 
-            move_window_add_col(neighbors, center_data, cell_start + vector2i(col + 1, row), container);
+            move_window_add_col(neighbors, center_data, cell_start + vector2i(col + 1, row), visitor);
         }
     }
 }
