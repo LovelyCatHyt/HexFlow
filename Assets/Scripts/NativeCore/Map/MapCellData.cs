@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.Collections;
 using HexFlow.NativeCore.Structures;
 using System;
+using UnityEngine.Profiling;
 
 namespace HexFlow.NativeCore.Map
 {
@@ -25,6 +26,7 @@ namespace HexFlow.NativeCore.Map
 
         public static void ApplyDataToMesh(NativeArray<MapCellData> data, Mesh target, HexMeshType type)
         {
+            Profiler.BeginSample("ApplyDataToMesh");
             int vertNum = type.GetVertNum();
 
             var colorBuffer = new NativeArray<Color>(target.colors, Allocator.Temp);
@@ -36,22 +38,29 @@ namespace HexFlow.NativeCore.Map
             target.SetColors(colorBuffer);
             target.SetUVs(0, uvBuffer);
             target.UploadMeshData(false);
+            Profiler.EndSample();
         }
 
         public static void ApplyDataToMesh(IntPtr data, int cellCount, Mesh target, HexMeshType type)
         {
+            Profiler.BeginSample("ApplyDataToMesh");
             int vertNum = type.GetVertNum();
             int totalVertNum = vertNum * cellCount;
-            
-            NativeArray<Color> colorBuffer = UnsafeUtils.CreateArrayFromSourceOrNew(target.colors, totalVertNum);
+
+            NativeArray<Color> colorBuffer = new NativeArray<Color>(totalVertNum, Allocator.Persistent);
             NativeArray<Vector2> uvBuffer = UnsafeUtils.CreateArrayFromSourceOrNew(target.uv, totalVertNum);
+            Profiler.BeginSample("ExtractMapDataToBuffer");
             unsafe
             {
                 ExtractRenderDataToMesh((MapCellData*)data, cellCount, colorBuffer.Get(), uvBuffer.Get(), vertNum);
             }
+            Profiler.EndSample();
             target.SetColors(colorBuffer);
             target.SetUVs(0, uvBuffer);
+            colorBuffer.Dispose();
+            uvBuffer.Dispose();
             target.UploadMeshData(false);
+            Profiler.EndSample();
         }
 
         public static void ApplyDataToMesh(INative2DArray<MapCellData> rectArea, Mesh target, HexMeshType type)

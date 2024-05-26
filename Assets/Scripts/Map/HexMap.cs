@@ -90,6 +90,11 @@ namespace HexFlow.Map
             }
         }
 
+        public void Generate(Vector2Int startPos, Vector2Int endPos)
+        {
+            MapData.Generate(startPos, endPos);
+        }
+
         public bool GenerateIfNotExist(Vector2Int chunkPos)
         {
             if (MapData.ExistChunk(chunkPos)) return false;

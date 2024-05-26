@@ -26,6 +26,7 @@ public class Test : MonoBehaviour
     public int waveNum = 4;
 
     private Camera _camera;
+    private bool _shouldGenerate = false;
     // private Transform _mapTran;
 
     private void Awake()
@@ -66,6 +67,12 @@ public class Test : MonoBehaviour
             map.RaycastToCell(ray, out var hitCell, out var _);
             map.GenerateIfNotExist(map.GetChunkPos(hitCell));
         }
+
+        if(_shouldGenerate)
+        {
+            _shouldGenerate = false;
+            map.Generate(startChunk, endChunk);
+        }
     }
 
     private void OnValidate()
@@ -81,13 +88,7 @@ public class Test : MonoBehaviour
 
     public void GenerateArea()
     {
-        for (int y = startChunk.y; y <= endChunk.y; y++)
-        {
-            for (int x = startChunk.x; x <= endChunk.x; x++)
-            {
-                map.Generate(new Vector2Int(x, y));
-            }
-        }
+        _shouldGenerate = true;
     }
 
     [ButtonInvoke(nameof(IterateMap))]

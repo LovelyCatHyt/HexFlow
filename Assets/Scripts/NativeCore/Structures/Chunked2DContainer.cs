@@ -5,8 +5,10 @@ using System.IO;
 using System.Linq;
 using Unitilities;
 using Unitilities.Serialization;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
-
+using UnityEngine.Profiling;
 using Ntv = HexFlow.NativeCore.Structures.Chunked2DContainer_Native;
 
 namespace HexFlow.NativeCore.Structures
@@ -17,6 +19,13 @@ namespace HexFlow.NativeCore.Structures
         /// 生成一个区块
         /// </summary>
         void Generate(Vector2Int chunkPos, IntPtr dataPtr, int seed, int chunkSize);
+    }
+
+    public interface IBatchChunkGenerator<T> : IChunkGenerator<T> where T : unmanaged
+    {
+        void GenerateArea(Vector2Int startPos, Vector2Int endPos, IntPtr[] dataPtr, int seed, int chunkSize);
+
+        JobHandle ScheduleJob(Vector2Int startPos, Vector2Int endPos, NativeArray<IntPtr> ptrArray, int seed, int chunkSize);
     }
 
     //public interface IChunkBatchGenerator<T> where T : unmanaged
@@ -52,7 +61,7 @@ namespace HexFlow.NativeCore.Structures
                 }
             }
         }
-    }
+        }
 
     /// <summary>
     /// 区块数据代理, 提供一个数组形式的访问器用于简单的读写操作
@@ -324,8 +333,13 @@ namespace HexFlow.NativeCore.Structures
         {
             bool isReGenerate = ExistChunk(chunkPos);
             IntPtr targetChunkData = CreateRawChunk(chunkPos);
-            
-            if (chunkGenerator != null && runGenerator) chunkGenerator.Generate(chunkPos, targetChunkData, seed, ChunkSize);
+
+            if (chunkGenerator != null && runGenerator)
+            {
+                Profiler.BeginSample("ChunkGenerate");
+                chunkGenerator.Generate(chunkPos, targetChunkData, seed, ChunkSize);
+                Profiler.EndSample();
+            }
 
             // 必须是全新创建的区块调用 onChunkCreated
             if (!isReGenerate) onChunkCreated?.Invoke(chunkPos, targetChunkData);
@@ -340,11 +354,39 @@ namespace HexFlow.NativeCore.Structures
         {
             MathTool.CorrectMinMax(start, end, out start, out end);
             // 没有区域生成器则手动遍历每个区块
-            for (int row = start.y; row <= end.y; row++)
+            if (chunkGenerator is IBatchChunkGenerator<T> batchGenerator)
             {
-                for (int col = start.x; col < end.x; col++)
+                var areaSize = end - start + Vector2Int.one;
+                int num = areaSize.x * areaSize.y; // 由于上面的修正最小最大值, num 不可能为 0
+                var dataPtrArr = new NativeArray<IntPtr>(num, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                var hasChunk = new bool[num];
+                for (int i = 0; i < num; i++)
                 {
-                    Generate(new Vector2Int(col, row));
+                    var pos = start + new Vector2Int(i % areaSize.x, i / areaSize.x);
+                    hasChunk[i] = ExistChunk(pos);
+                    if(hasChunk[i]) dataPtrArr[i] = GetChunk(pos);
+                    else dataPtrArr[i] = CreateRawChunk(pos);
+                }
+
+                var jobHandle = batchGenerator.ScheduleJob(start, end, dataPtrArr, seed, ChunkSize);
+                // 简单的测试先写成同步的
+                jobHandle.Complete();
+
+                for (int i = 0; i < num; i++)
+                {
+                    var pos = start + new Vector2Int(i % areaSize.x, i / areaSize.x);
+                    if (hasChunk[i]) onChunkRegen?.Invoke(pos, dataPtrArr[i]);
+                    else onChunkCreated?.Invoke(pos, dataPtrArr[i]);
+                }
+            }
+            else
+            {
+                for (int row = start.y; row <= end.y; row++)
+                {
+                    for (int col = start.x; col < end.x; col++)
+                    {
+                        Generate(new Vector2Int(col, row));
+                    }
                 }
             }
         }
