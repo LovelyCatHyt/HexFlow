@@ -358,7 +358,7 @@ namespace HexFlow.NativeCore.Structures
             {
                 var areaSize = end - start + Vector2Int.one;
                 int num = areaSize.x * areaSize.y; // 由于上面的修正最小最大值, num 不可能为 0
-                var dataPtrArr = new NativeArray<IntPtr>(num, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                var dataPtrArr = new NativeArray<IntPtr>(num, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
                 var hasChunk = new bool[num];
                 for (int i = 0; i < num; i++)
                 {
@@ -378,6 +378,8 @@ namespace HexFlow.NativeCore.Structures
                     if (hasChunk[i]) onChunkRegen?.Invoke(pos, dataPtrArr[i]);
                     else onChunkCreated?.Invoke(pos, dataPtrArr[i]);
                 }
+
+                dataPtrArr.Dispose();
             }
             else
             {
