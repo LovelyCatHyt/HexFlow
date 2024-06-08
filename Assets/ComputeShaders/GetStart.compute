@@ -1,0 +1,26 @@
+#include "CommonLib.hlsl"
+
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+
+float2 Res;
+
+int Mask;
+
+float4 MakeColor(int x, int y)
+{
+    return float4(x / Res.x + 0.25f, (x ^ y) / Res.x, (x & y) / Res.y, 1);
+}
+
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    int x = id.x & Mask;
+    int y = id.y & Mask;
+    Result[id.xy] = MakeColor(x, y) + foo();
+}
+

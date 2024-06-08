@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ConnectiveHexMat
+  m_Name: M_ConnectiveHex
   m_Shader: {fileID: -6465566751694194690, guid: 69864b7dbeaa83042bcb71f193341ef9, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0

@@ -1,0 +1,43 @@
+#include "PerlinNoise_Functions.hlsl"
+
+#pragma kernel Noise
+#pragma kernel FractalNoise
+
+float DefaultZ = 0;
+
+// xy for scale, zw for offset
+float4 Tiling;
+
+StructuredBuffer<int> Permutation;
+RWTexture2D<float> OutNoiseTex;
+
+[numthreads(8, 8, 1)]
+void Noise(uint3 id : SV_DispatchThreadID)
+{
+    float2 xy = id.xy * Tiling.xy + Tiling.zw;
+    OutNoiseTex[id.xy] = Remap_01(Noise3D(Permutation, xy.x, xy.y, DefaultZ));
+}
+
+int FractalNum = 1;
+
+[numthreads(8, 8, 1)]
+void FractalNoise(uint3 id : SV_DispatchThreadID)
+{
+    float2 xy = id.xy * Tiling.xy + Tiling.zw;
+    float freq = 1;
+    float ampSum = 0;
+    
+    float value = 0;
+    
+    for (int i = 0; i < FractalNum; i++)
+    {
+        float amp = 1 / freq;
+        value += Noise3D(Permutation, xy.x * freq, xy.y * freq, DefaultZ) * amp;
+        ampSum += amp;
+        freq *= 2;
+    }
+    
+    OutNoiseTex[id.xy] = Remap_01(value / ampSum);
+}
+
+

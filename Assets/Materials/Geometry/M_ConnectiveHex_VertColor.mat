@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ConnectiveHexMat_VertColor
+  m_Name: M_ConnectiveHex_VertColor
   m_Shader: {fileID: -6465566751694194690, guid: c2c49c575ed0c334aa95a499c16ea992, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
