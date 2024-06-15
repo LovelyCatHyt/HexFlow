@@ -9,122 +9,129 @@ using System.Diagnostics;
 
 using Debug = UnityEngine.Debug;
 
-public class Test : MonoBehaviour
+namespace Experiment
 {
-    public HexMap map;
-    public string fileNameNoExtend;
-    
-    [Space]
-    public Vector2Int startChunk;
-    public Vector2Int endChunk;
-
-    [Space]
-    [Min(0)]
-    public float threshold = 1;
-    public Vector2 noiseScale = Vector2.one;
-    public Vector2 noiseOffset = Vector2.zero;
-    public int waveNum = 4;
-
-    private Camera _camera;
-    private bool _shouldGenerate = false;
-    // private Transform _mapTran;
-
-    private void Awake()
+    public class Test : MonoBehaviour
     {
-        if (!map) map = GetComponent<HexMap>();
-        map.MapData.chunkGenerator = new PerlinNoiseTerrainGenerator(noiseScale, noiseOffset, waveNum, threshold);
+        public HexMap map;
+        public string fileNameNoExtend;
 
-        _camera = Camera.main;
-    }
+        [Space]
+        public Vector2Int startChunk;
+        public Vector2Int endChunk;
 
-    private void Update()
-    {
-        Vector2Int pos;
-        if (map.GenerateIfNotExist(_camera.transform.position, out pos))
-        {
-            Debug.Log($"Create chunk at: {pos}");
-        }
+        [Space]
+        [Min(0)]
+        public float threshold = 1;
+        public Vector2 noiseScale = Vector2.one;
+        public Vector2 noiseOffset = Vector2.zero;
+        public int waveNum = 4;
 
-        if (Input.GetMouseButton(0))
-        {
-            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            map.RaycastToCell(ray, out _, out var hitPos);
-            var data = map.GetData(hitPos);
-            data.enabled = true;
-            map.SetData(hitPos, data);
+        private Camera _camera;
+        private bool _shouldGenerate = false;
+        // private Transform _mapTran;
 
-        }
-        else if (Input.GetMouseButton(1))
+        private void Awake()
         {
-            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            map.RaycastToCell(ray, out _, out var hitPos);
-            var data = map.GetData(hitPos);
-            data.enabled = false;
-            map.SetData(hitPos, data);
-        }else if (Input.GetMouseButton(2))
-        {
-            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            map.RaycastToCell(ray, out var hitCell, out var _);
-            map.GenerateIfNotExist(map.GetChunkPos(hitCell));
-        }
-
-        if(_shouldGenerate)
-        {
-            _shouldGenerate = false;
-            map.Generate(startChunk, endChunk);
-        }
-    }
-
-    private void OnValidate()
-    {
-        if(UnityEditor.EditorApplication.isPlaying && map && map.MapData != null)
-        {
+            if (!map) map = GetComponent<HexMap>();
             map.MapData.chunkGenerator = new PerlinNoiseTerrainGenerator(noiseScale, noiseOffset, waveNum, threshold);
+
+            _camera = Camera.main;
+
+
+            // SingletonManager.Instance.Get<Singleton2>().DoSomething();
         }
-    }
 
-    [ButtonInvoke(nameof(GenerateArea))]
-    public bool regenerate;
+        private void Update()
+        {
+            Vector2Int pos;
+            if (map.GenerateIfNotExist(_camera.transform.position, out pos))
+            {
+                Debug.Log($"Create chunk at: {pos}");
+            }
 
-    public void GenerateArea()
-    {
-        _shouldGenerate = true;
-    }
+            if (Input.GetMouseButton(0))
+            {
+                var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                map.RaycastToCell(ray, out _, out var hitPos);
+                var data = map.GetData(hitPos);
+                data.enabled = true;
+                map.SetData(hitPos, data);
 
-    [ButtonInvoke(nameof(IterateMap))]
-    public bool iterateMap;
+            }
+            else if (Input.GetMouseButton(1))
+            {
+                var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                map.RaycastToCell(ray, out _, out var hitPos);
+                var data = map.GetData(hitPos);
+                data.enabled = false;
+                map.SetData(hitPos, data);
+            }
+            else if (Input.GetMouseButton(2))
+            {
+                var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                map.RaycastToCell(ray, out var hitCell, out var _);
+                map.GenerateIfNotExist(map.GetChunkPos(hitCell));
+            }
 
-    public void IterateMap()
-    {
-        Vector2Int[] chkPosArr = map.MapData.GetKeys(true);
-        Debug.Log($"Iterate count({chkPosArr.Length}) == Map.ChunkCount({map.MapData.ChunkCount}): {chkPosArr.Length == map.MapData.ChunkCount}");
-        Debug.Log(ListPrinter.PrintLines(chkPosArr));
-    }
+            if (_shouldGenerate)
+            {
+                _shouldGenerate = false;
+                map.Generate(startChunk, endChunk);
+            }
+        }
 
-    [ButtonInvoke(nameof(SaveMap))]
-    public bool saveMap;
-    public void SaveMap()
-    {
-        Stopwatch stopwatch = Stopwatch.StartNew();
-        map.MapData.SaveTo(fileNameNoExtend, DataScope.Save);
-        stopwatch.Stop();
-        Debug.Log($"Saved: <color=#aaff55>{stopwatch.ElapsedMilliseconds}</color> ms");
-    }
+        private void OnValidate()
+        {
+            if (UnityEditor.EditorApplication.isPlaying && map && map.MapData != null)
+            {
+                map.MapData.chunkGenerator = new PerlinNoiseTerrainGenerator(noiseScale, noiseOffset, waveNum, threshold);
+            }
+        }
 
-    [ButtonInvoke(nameof(LoadMap))]
-    public bool loadMap;
-    public void LoadMap()
-    {
-        try
+        [ButtonInvoke(nameof(GenerateArea))]
+        public bool regenerate;
+
+        public void GenerateArea()
+        {
+            _shouldGenerate = true;
+        }
+
+        [ButtonInvoke(nameof(IterateMap))]
+        public bool iterateMap;
+
+        public void IterateMap()
+        {
+            Vector2Int[] chkPosArr = map.MapData.GetKeys(true);
+            Debug.Log($"Iterate count({chkPosArr.Length}) == Map.ChunkCount({map.MapData.ChunkCount}): {chkPosArr.Length == map.MapData.ChunkCount}");
+            Debug.Log(ListPrinter.PrintLines(chkPosArr));
+        }
+
+        [ButtonInvoke(nameof(SaveMap))]
+        public bool saveMap;
+        public void SaveMap()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            map.MapData.LoadFrom(fileNameNoExtend, DataScope.Save);
+            map.MapData.SaveTo(fileNameNoExtend, DataScope.Save);
             stopwatch.Stop();
-            Debug.Log($"Loaded: <color=#aaff55>{stopwatch.ElapsedMilliseconds}</color> ms");
+            Debug.Log($"Saved: <color=#aaff55>{stopwatch.ElapsedMilliseconds}</color> ms");
         }
-        catch (FileNotFoundException)
+
+        [ButtonInvoke(nameof(LoadMap))]
+        public bool loadMap;
+        public void LoadMap()
         {
-            Debug.LogWarning("File not found!");
+            try
+            {
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                map.MapData.LoadFrom(fileNameNoExtend, DataScope.Save);
+                stopwatch.Stop();
+                Debug.Log($"Loaded: <color=#aaff55>{stopwatch.ElapsedMilliseconds}</color> ms");
+            }
+            catch (FileNotFoundException)
+            {
+                Debug.LogWarning("File not found!");
+            }
         }
-    }
+    } 
 }
