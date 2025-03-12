@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="800,800" opaque="false">
+  <displayList>
+    <component id="n14_pyis" name="frame" src="pyis2" fileName="SideFrame.xml" pkg="4pt19cbq" xy="0,0" size="800,800">
+      <relation target="" sidePair="width-width,height-height"/>
+      <Label title="Tool"/>
+    </component>
+    <component id="n11_pyis" name="n0" src="pyis0" fileName="ButtonMid.xml" pkg="4pt19cbq" xy="200,100" size="400,100"/>
+    <component id="n3_pyis" name="n1" src="pyis0" fileName="ButtonMid.xml" pkg="4pt19cbq" xy="200,250" size="400,100"/>
+    <component id="n8_pyis" name="n2" src="pyis0" fileName="ButtonMid.xml" pkg="4pt19cbq" xy="200,400" size="400,100"/>
+    <component id="n9_pyis" name="saveBtn" src="pyis0" fileName="ButtonMid.xml" pkg="4pt19cbq" xy="150,600" size="200,100" group="n13_pyis" tooltips="保存 Debug 地图">
+      <Button title="保存"/>
+    </component>
+    <component id="n10_pyis" name="loadBtn" src="pyis0" fileName="ButtonMid.xml" pkg="4pt19cbq" xy="450,600" size="200,100" group="n13_pyis" tooltips="读取 Debug 地图">
+      <Button title="加载"/>
+    </component>
+    <group id="n13_pyis" name="saveLoadGroup" xy="150,600" size="500,100" advanced="true" layout="hz" colGap="100" excludeInvisibles="true">
+      <relation target="" sidePair="center-center,top-top"/>
+    </group>
+  </displayList>
+</component>

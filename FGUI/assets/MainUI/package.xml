@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="40rgsy3s">
+  <resources>
+    <component id="cpnp0" name="TestToolPanel.xml" path="/" exported="true"/>
+    <component id="pyis1" name="Main.xml" path="/" exported="true"/>
+    <component id="qec22" name="StatusBar.xml" path="/"/>
+  </resources>
+  <publish name=""/>
+</packageDescription>

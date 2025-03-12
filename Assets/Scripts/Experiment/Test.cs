@@ -8,6 +8,8 @@ using HexFlow.NativeCore.Map;
 using System.Diagnostics;
 
 using Debug = UnityEngine.Debug;
+using FairyGUI;
+using HexFlow.UI;
 
 namespace Experiment
 {
@@ -38,40 +40,52 @@ namespace Experiment
 
             _camera = Camera.main;
 
-
+            UIConfig.tooltipsWin = "ui://4pt19cbqpyis6";
             // SingletonManager.Instance.Get<Singleton2>().DoSomething();
         }
 
         private void Update()
         {
-            Vector2Int pos;
-            if (map.GenerateIfNotExist(_camera.transform.position, out pos))
-            {
-                Debug.Log($"Create chunk at: {pos}");
-            }
+            //Vector2Int pos;
+            //if (map.GenerateIfNotExist(_camera.transform.position, out pos))
+            //{
+            //    Debug.Log($"Create chunk at: {pos}");
+            //}
 
-            if (Input.GetMouseButton(0))
+            if (!Stage.isTouchOnUI)
             {
                 var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                map.RaycastToCell(ray, out _, out var hitPos);
-                var data = map.GetData(hitPos);
-                data.enabled = true;
-                map.SetData(hitPos, data);
+                map.RaycastToCell(ray, out var hitCell, out var hitPos);
+                if (Input.GetMouseButton(0))
+                {
+                    var data = map.GetData(hitPos);
+                    data.enabled = true;
+                    map.SetData(hitPos, data);
 
-            }
-            else if (Input.GetMouseButton(1))
-            {
-                var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                map.RaycastToCell(ray, out _, out var hitPos);
-                var data = map.GetData(hitPos);
-                data.enabled = false;
-                map.SetData(hitPos, data);
-            }
-            else if (Input.GetMouseButton(2))
-            {
-                var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                map.RaycastToCell(ray, out var hitCell, out var _);
-                map.GenerateIfNotExist(map.GetChunkPos(hitCell));
+                }
+                else if (Input.GetMouseButton(1))
+                {
+                    var data = map.GetData(hitPos);
+                    data.enabled = false;
+                    map.SetData(hitPos, data);
+                }
+                else if (Input.GetMouseButton(2))
+                {
+                    map.GenerateIfNotExist(map.GetChunkPos(hitCell));
+                }
+
+                // 显示当前位置
+                var _data = map.GetData(hitCell);
+                Color color = _data.color;
+                if(_data.enabled)
+                {
+                    StatusBar.inst.SetText($"cell: {hitCell}, chunk: {map.GetChunkPos(hitCell)}, color: {color}");
+                }
+                else
+                {
+                    StatusBar.inst.SetText($"cell: {hitCell}, chunk: {map.GetChunkPos(hitCell)}, [color=#333333]color: {color}[/color]");
+                }
+
             }
 
             if (_shouldGenerate)

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="1920,1080" opaque="false">
+  <displayList>
+    <component id="n2_pyis" name="debugToolBtn" src="pyis5" fileName="ToolButton.xml" pkg="4pt19cbq" xy="0,0" tooltips="DebugTool">
+      <relation target="" sidePair="left-left,top-top"/>
+    </component>
+    <text id="n3_8n3g" name="n3" xy="0,0" size="50,50" fontSize="32" align="center" vAlign="middle" autoSize="none" text="设">
+      <relation target="n2_pyis" sidePair="width-width,height-height"/>
+    </text>
+    <component id="n5_qec2" name="statusBar" src="qec22" fileName="StatusBar.xml" xy="0,1080" pivot="0,1" anchor="true" size="1920,25">
+      <relation target="" sidePair="left-left,bottom-bottom"/>
+    </component>
+  </displayList>
+</component>

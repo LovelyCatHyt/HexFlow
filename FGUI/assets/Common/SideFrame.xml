@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="600,800" extention="Label" initName="frame">
+  <displayList>
+    <graph id="n3_pyis" name="background" xy="0,0" size="600,800" type="rect" fillColor="#33ffffff">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <graph id="n0_pyis" name="dragArea" xy="0,0" size="600,50" type="rect" fillColor="#80cccccc">
+      <relation target="" sidePair="width-width,top-top"/>
+    </graph>
+    <component id="n1_pyis" name="closeButton" src="pyis4" fileName="CloseButton.xml" xy="555,5">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <text id="n2_pyis" name="title" xy="195,0" pivot="0.5,0" size="213,54" fontSize="40" align="center" vAlign="bottom" autoClearText="true" text="FrameTitle">
+      <relation target="" sidePair="center-center,top-top"/>
+    </text>
+  </displayList>
+</component>

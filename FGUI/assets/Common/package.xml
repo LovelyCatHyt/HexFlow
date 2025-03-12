@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="4pt19cbq">
+  <resources>
+    <component id="pyis0" name="ButtonMid.xml" path="/" exported="true"/>
+    <component id="pyis2" name="SideFrame.xml" path="/" exported="true"/>
+    <component id="pyis4" name="CloseButton.xml" path="/"/>
+    <component id="pyis5" name="ToolButton.xml" path="/" exported="true"/>
+    <component id="pyis6" name="Tooltip.xml" path="/" exported="true"/>
+  </resources>
+  <publish name=""/>
+</packageDescription>

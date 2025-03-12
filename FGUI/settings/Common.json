@@ -1,0 +1,27 @@
+{
+  "font": "",
+  "fontSize": 12,
+  "textColor": "#000000",
+  "fontAdjustment": false,
+  "colorScheme": [
+    "自定义颜色 #FF0000"
+  ],
+  "fontSizeScheme": [
+    "标题1 60",
+    "标题2 40",
+    "普通文本 30"
+  ],
+  "fontScheme": [
+    "默认字体"
+  ],
+  "scrollBars": {
+    "horizontal": "",
+    "vertical": "",
+    "defaultDisplay": "visible"
+  },
+  "tipsRes": "",
+  "buttonClickSound": "",
+  "pivot": "default",
+  "listClearOnPublish": false,
+  "fileName": "Common"
+}

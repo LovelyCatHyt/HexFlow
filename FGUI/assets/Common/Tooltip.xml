@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="274,42" extention="Label">
+  <displayList>
+    <graph id="n1_pyis" name="background" xy="-5,-5" size="284,52" type="rect" fillColor="#bf383838">
+      <relation target="" sidePair="width-width,height-height,center-center,middle-middle"/>
+    </graph>
+    <text id="n0_pyis" name="title" xy="0,0" size="274,42" fontSize="30" color="#ffffff" autoClearText="true" text="这是一条普通的Tips"/>
+  </displayList>
+  <relation target="n0_pyis" sidePair="width-width,height-height"/>
+</component>
