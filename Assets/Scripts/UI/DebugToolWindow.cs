@@ -26,6 +26,7 @@ namespace HexFlow.UI
         public DebugToolWindow(HexMap map)
         {
             _map = map;
+            modal = true;
         }
 
         protected override void OnShown()

@@ -37,7 +37,7 @@ namespace HexFlow.Map
 
             var oldPos = transform.position;
             var mapPlane = new Plane(Vector3.up, oldPos.y);
-            var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            var mouseRay = Camera.main.ScreenPointToRay(UnityEngine.Input.mousePosition);
 
             float hit;
             mapPlane.Raycast(mouseRay, out hit);
