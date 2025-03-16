@@ -96,5 +96,31 @@ namespace HexFlow.NativeCore
             new Vector2Int(0, -1),
             new Vector2Int(1, -1),
         };
+
+        /// <summary>
+        /// 从右边开始, 逆时针方向的四个矩形邻域向量. (假设右和上分别为两轴正向)
+        /// </summary>
+        public static readonly Vector2Int[] Rect4Dirs =
+        {
+            new Vector2Int(1, 0),
+            new Vector2Int(0, 1),
+            new Vector2Int(-1, 0),
+            new Vector2Int(0, -1),
+        };
+
+        /// <summary>
+        /// 从右边开始, 逆时针方向的八个矩形邻域向量. (假设右和上分别为两轴正向)
+        /// </summary>
+        public static readonly Vector2Int[] Rect8Dirs =
+        {
+            new Vector2Int(1, 0),
+            new Vector2Int(1, 1),
+            new Vector2Int(0, 1),
+            new Vector2Int(-1, 1),
+            new Vector2Int(-1, 0),
+            new Vector2Int(-1, -1),
+            new Vector2Int(0, -1),
+            new Vector2Int(1, -1),
+        };
     }
 }

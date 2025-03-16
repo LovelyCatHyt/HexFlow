@@ -56,6 +56,22 @@ namespace HexFlow.Map
 
         private void LateUpdate()
         {
+
+            // 对每个待更新 chunk 再扫描一下八邻域的已创建 chunk，如果存在则再追加到待更新集合中
+            var scanSourceList = pendingUpdateUVChunks.ToList();
+            foreach (var src in scanSourceList)
+            {
+                foreach (var deltaChkPos in HexMath.Rect8Dirs)
+                {
+                    var nbrChunk = src + deltaChkPos;
+                    if (MapData.ExistChunk(nbrChunk))
+                    {
+                        pendingUpdateUVChunks.Add(nbrChunk);
+                    }
+                }
+
+            }
+
             // 用 Linq 复制一份坐标数组, 因为在生成过程可能会添加坐标(尽管就是参数里的同一个坐标)
             foreach (var chunkPos in pendingUpdateUVChunks.ToArray())
             {
@@ -157,7 +173,7 @@ namespace HexFlow.Map
         /// <summary>
         /// 向世界坐标下的格点设置数据, 若该坐标无区块则生成后再设置
         /// </summary>
-        public void SetData(Vector2Int cellPos, MapCellData data, bool updateNeighborChunk = true)
+        public void SetData(Vector2Int cellPos, MapCellData data)
         {
             var chunkPos = MapData.ToChunkPos(cellPos);
             GenerateIfNotExist(chunkPos);
@@ -165,26 +181,14 @@ namespace HexFlow.Map
             var cellInChunk = TransformMapToChunk(chunkPos, cellPos);
             chunkArr[cellInChunk] = data;
             pendingUpdateUVChunks.Add(chunkPos);
-            if (updateNeighborChunk)
-            {
-                var axialPos = cellPos.ToAxial();
-                for (int i = 0; i < 6; i++)
-                {
-                    // 六个邻居都要考虑
-                    var nbrAxial = HexMath.AxialDirs[i] + axialPos;
-                    var nbrOffset = nbrAxial.ToOffset();
-                    var nbrChunk = MapData.ToChunkPos(nbrOffset);
-                    pendingUpdateUVChunks.Add(nbrChunk);
-                }
-            }
         }
         /// <summary>
         /// 向世界坐标下的格点设置数据, 若该坐标无区块则生成后再设置
         /// </summary>
-        public void SetData(Vector3 positionInWorld, MapCellData data, bool updateNeighborChunk = true)
+        public void SetData(Vector3 positionInWorld, MapCellData data)
         {
             var cellPos = GetCellPos(positionInWorld);
-            SetData(cellPos, data, updateNeighborChunk);
+            SetData(cellPos, data);
         }
 
         public Vector2Int TransformMapToChunk(Vector2Int chunkPos, Vector2Int cellPos)
